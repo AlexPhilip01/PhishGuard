@@ -14,7 +14,8 @@ back to writing the .html file and says so, rather than failing outright.
 from pathlib import Path
 
 
-def print_report(headers, ip_analysis, keyword_findings, score, reasons, verdict, feed_matches=None):
+def print_report(headers, ip_analysis, keyword_findings, score, reasons, verdict, feed_matches=None,
+                  auth_results=None, dmarc_lookup=None):
     print("\n" + "=" * 55)
     print("       PHISHING EMAIL ANALYSIS REPORT")
     print("=" * 55)
@@ -47,6 +48,22 @@ def print_report(headers, ip_analysis, keyword_findings, score, reasons, verdict
                 print(f"  ⚠️  {url}  —  matches a known-active phishing URL")
         else:
             print("  No URLs matched the live feed")
+
+    if auth_results or dmarc_lookup is not None:
+        print("\n🔐 EMAIL AUTHENTICATION (SPF / DKIM / DMARC)")
+        if auth_results:
+            for key in ("spf", "dkim", "dmarc"):
+                if key in auth_results:
+                    print(f"  {key.upper():6}(per receiving server): {auth_results[key]}")
+        else:
+            print("  No Authentication-Results header found on this message")
+        if dmarc_lookup is not None:
+            if dmarc_lookup["found"]:
+                print(f"  Sender domain DMARC policy: p={dmarc_lookup['policy']}")
+            elif dmarc_lookup["error"] is None:
+                print("  Sender domain publishes no DMARC record")
+            else:
+                print(f"  DMARC lookup inconclusive ({dmarc_lookup['error']})")
 
     print("\n📊 RISK SCORE BREAKDOWN")
     if reasons:

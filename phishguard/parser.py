@@ -95,6 +95,7 @@ def extract_headers(msg: Message) -> dict:
         "reply_to": msg.get("Reply-To", "Not found"),
         "date": msg.get("Date", "Not found"),
         "received": msg.get_all("Received", []),
+        "authentication_results": msg.get_all("Authentication-Results", []),
     }
 
 

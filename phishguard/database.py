@@ -31,7 +31,9 @@ CREATE TABLE IF NOT EXISTS analyses (
     ips_json      TEXT,
     keywords_json TEXT,
     reasons_json  TEXT,
-    feed_matches_json TEXT
+    feed_matches_json TEXT,
+    auth_results_json TEXT,
+    dmarc_json    TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_analyses_score ON analyses(score);
 CREATE INDEX IF NOT EXISTS idx_analyses_analyzed_at ON analyses(analyzed_at);
@@ -53,6 +55,12 @@ def _connect(db_path: Path):
 def init_db(db_path: Path = DEFAULT_DB_PATH) -> None:
     with _connect(db_path) as conn:
         conn.executescript(SCHEMA)
+        # Migrate databases created before the DMARC feature existed —
+        # CREATE TABLE IF NOT EXISTS won't add columns to an existing table.
+        existing_cols = {row["name"] for row in conn.execute("PRAGMA table_info(analyses)")}
+        for col in ("auth_results_json", "dmarc_json"):
+            if col not in existing_cols:
+                conn.execute(f"ALTER TABLE analyses ADD COLUMN {col} TEXT")
 
 
 def save_analysis(result: dict, db_path: Path = DEFAULT_DB_PATH) -> int:
@@ -68,8 +76,9 @@ def save_analysis(result: dict, db_path: Path = DEFAULT_DB_PATH) -> int:
             """
             INSERT INTO analyses
                 (analyzed_at, filename, sender, subject, score, verdict,
-                 ips_json, keywords_json, reasons_json, feed_matches_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 ips_json, keywords_json, reasons_json, feed_matches_json,
+                 auth_results_json, dmarc_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 datetime.now(timezone.utc).isoformat(),
@@ -82,6 +91,8 @@ def save_analysis(result: dict, db_path: Path = DEFAULT_DB_PATH) -> int:
                 json.dumps(result.get("keyword_findings", {})),
                 json.dumps(result.get("reasons", [])),
                 json.dumps(result.get("feed_matches", [])),
+                json.dumps(result.get("auth_results", {})),
+                json.dumps(result.get("dmarc_lookup", {})),
             ),
         )
         return cur.lastrowid

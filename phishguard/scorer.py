@@ -19,6 +19,10 @@ REPLY_TO_MISMATCH_POINTS = 25
 PRIVATE_IP_POINTS_EACH = 15
 PRIVATE_IP_POINTS_MAX = 30
 FEED_MATCH_POINTS = 40  # externally-confirmed known-bad URL — strong signal
+AUTH_DMARC_FAIL_POINTS = 35  # the receiving mail server itself flagged this
+AUTH_SPF_FAIL_POINTS = 15
+AUTH_DKIM_FAIL_POINTS = 15
+NO_DMARC_RECORD_POINTS = 10  # weak signal alone — plenty of legit senders skip DMARC
 
 
 def calculate_score(
@@ -27,6 +31,8 @@ def calculate_score(
     reply_to_mismatch,
     suspicious_display_name=None,
     feed_matches=None,
+    auth_results=None,
+    dmarc_lookup=None,
 ):
     """
     Scores the email from 0-100 based on all findings.
@@ -40,7 +46,10 @@ def calculate_score(
       Urgency keywords        : +10
       Fear keywords           : +10
       Financial keywords      : +10
-      Known-bad URL (feed)    : +40 (new — only if a threat feed was checked)
+      Known-bad URL (feed)    : +40
+      DMARC fail (per receiving server) : +35
+      SPF or DKIM fail (and DMARC didn't already fail) : +15 each
+      No DMARC record published at all  : +10
     """
     score = 0
     reasons = []
@@ -72,6 +81,26 @@ def calculate_score(
         reasons.append(
             f"{len(feed_matches)} URL(s) matched a live phishing threat feed (+{FEED_MATCH_POINTS})"
         )
+
+    if auth_results:
+        if auth_results.get("dmarc") == "fail":
+            score += AUTH_DMARC_FAIL_POINTS
+            reasons.append(f"Receiving mail server reported DMARC fail (+{AUTH_DMARC_FAIL_POINTS})")
+        else:
+            # Only look at SPF/DKIM individually when DMARC itself didn't already
+            # fail, so one underlying auth problem isn't counted three times.
+            if auth_results.get("spf") == "fail":
+                score += AUTH_SPF_FAIL_POINTS
+                reasons.append(f"Receiving mail server reported SPF fail (+{AUTH_SPF_FAIL_POINTS})")
+            if auth_results.get("dkim") == "fail":
+                score += AUTH_DKIM_FAIL_POINTS
+                reasons.append(f"Receiving mail server reported DKIM fail (+{AUTH_DKIM_FAIL_POINTS})")
+
+    if dmarc_lookup and not dmarc_lookup.get("found") and dmarc_lookup.get("error") is None:
+        # error is None means the lookup was definitive (not a timeout/network
+        # issue) — the domain genuinely has no DMARC record.
+        score += NO_DMARC_RECORD_POINTS
+        reasons.append(f"Sender domain publishes no DMARC record (+{NO_DMARC_RECORD_POINTS})")
 
     return min(score, 100), reasons
 

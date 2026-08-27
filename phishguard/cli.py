@@ -20,7 +20,7 @@ import glob
 import os
 import sys
 
-from . import database, report, threat_feed
+from . import database, dmarc, report, threat_feed
 from .core import analyze_single
 
 
@@ -40,7 +40,7 @@ def _get_feed_urls(use_feed: bool):
 
 def cmd_analyze(args):
     feed_urls = _get_feed_urls(not args.no_feed)
-    result = analyze_single(args.file, feed_urls=feed_urls)
+    result = analyze_single(args.file, feed_urls=feed_urls, check_dmarc=not args.no_dmarc)
 
     if result["error"]:
         print(f"❌ Error reading file: {result['error']}")
@@ -50,6 +50,7 @@ def cmd_analyze(args):
         result["headers"], result["ip_analysis"], result["keyword_findings"],
         result["score"], result["reasons"], result["verdict"],
         feed_matches=result["feed_matches"],
+        auth_results=result["auth_results"], dmarc_lookup=result["dmarc_lookup"],
     )
     database.save_analysis(result)
 
@@ -76,7 +77,7 @@ def cmd_batch(args):
         print(f"  Analyzing: {os.path.basename(file_path)}")
         print("─" * 55)
 
-        result = analyze_single(file_path, feed_urls=feed_urls)
+        result = analyze_single(file_path, feed_urls=feed_urls, check_dmarc=not args.no_dmarc)
         all_results.append(result)
 
         if result["error"]:
@@ -87,6 +88,7 @@ def cmd_batch(args):
             result["headers"], result["ip_analysis"], result["keyword_findings"],
             result["score"], result["reasons"], result["verdict"],
             feed_matches=result["feed_matches"],
+            auth_results=result["auth_results"], dmarc_lookup=result["dmarc_lookup"],
         )
         database.save_analysis(result)
 
@@ -99,6 +101,38 @@ def cmd_batch(args):
             print(f"📥 PDF report saved to {path}")
         else:
             print(f"📥 Report saved to {path} (install xhtml2pdf for a real .pdf)")
+
+
+def cmd_check_domain(args):
+    """Standalone DMARC (+ auth header context) check for any domain — not
+    tied to analyzing a specific email."""
+    domain = args.domain.strip().lower().removeprefix("http://").removeprefix("https://").rstrip("/")
+    print(f"\n🔐 DMARC check — {domain}")
+    print("-" * 55)
+
+    result = dmarc.lookup_dmarc(domain, timeout=args.timeout)
+    if result["found"]:
+        print(f"  ✅ DMARC record found")
+        print(f"     Policy (p=)      : {result['policy']}")
+        for tag in ("sp", "pct", "rua", "ruf", "adkim", "aspf"):
+            if tag in result["tags"]:
+                print(f"     {tag:17}: {result['tags'][tag]}")
+        print(f"     Raw record       : {result['raw']}")
+        policy_notes = {
+            "reject": "Strictest setting — mail failing DMARC alignment should be blocked outright.",
+            "quarantine": "Moderate — mail failing alignment should be sent to spam/junk.",
+            "none": "Monitoring only — failing mail is still delivered normally; this domain isn't enforcing anything yet.",
+        }
+        note = policy_notes.get(result["policy"])
+        if note:
+            print(f"\n  {note}")
+    elif result["error"] is None:
+        print("  ⚠️  No DMARC record published for this domain.")
+        print("     Mail claiming to be from this domain has no DMARC-based protection against spoofing.")
+    else:
+        print(f"  ❓ Lookup inconclusive: {result['error']}")
+        print("     (Try again, or check your network/DNS — this isn't a 'no record' result.)")
+    print()
 
 
 def cmd_history(args):
@@ -134,13 +168,20 @@ def main():
     p_analyze.add_argument("file", help="Path to the .eml file")
     p_analyze.add_argument("--pdf", help="Also write a PDF report to this path")
     p_analyze.add_argument("--no-feed", action="store_true", help="Skip the live threat-feed check")
+    p_analyze.add_argument("--no-dmarc", action="store_true", help="Skip the live DMARC DNS lookup")
     p_analyze.set_defaults(func=cmd_analyze)
 
     p_batch = sub.add_parser("batch", help="Analyze every .eml file in a folder")
     p_batch.add_argument("folder", help="Folder containing .eml files")
     p_batch.add_argument("--pdf", help="Also write a combined PDF report to this path")
     p_batch.add_argument("--no-feed", action="store_true", help="Skip the live threat-feed check")
+    p_batch.add_argument("--no-dmarc", action="store_true", help="Skip the live DMARC DNS lookup")
     p_batch.set_defaults(func=cmd_batch)
+
+    p_domain = sub.add_parser("check-domain", help="Check the DMARC record for any domain, standalone")
+    p_domain.add_argument("domain", help="Domain to check, e.g. example.com")
+    p_domain.add_argument("--timeout", type=float, default=5.0, help="DNS lookup timeout in seconds")
+    p_domain.set_defaults(func=cmd_check_domain)
 
     p_history = sub.add_parser("history", help="Show past analyses recorded locally")
     p_history.add_argument("--limit", type=int, default=20)
