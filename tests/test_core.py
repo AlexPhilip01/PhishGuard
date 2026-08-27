@@ -4,10 +4,11 @@ Basic tests for the core detection logic. Run with:  pytest
 import sys
 from email.message import EmailMessage
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from phishguard import ip_utils, keywords, parser, scorer, threat_feed  # noqa: E402
+from phishguard import dmarc, ip_utils, keywords, parser, scorer, threat_feed  # noqa: E402
 
 
 def test_valid_ip():
@@ -135,3 +136,87 @@ def test_multipart_email_keywords_and_feed_url_are_now_detected():
     urls = threat_feed.extract_urls(body)
     matches = threat_feed.check_urls_against_feed(urls, ["http://paypa1-security.com/login"])
     assert matches == ["http://paypa1-security.com/login"]
+
+
+# --- DMARC / SPF / auth-results checking --------------------------------
+
+def test_get_domain_from_address():
+    assert dmarc.get_domain('"You have been HACKED" <kfixc@kawachi.zaq.ne.jp>') == "kawachi.zaq.ne.jp"
+    assert dmarc.get_domain("no-at-sign-here") == ""
+
+
+def test_parse_authentication_results_real_header_format():
+    # Exact shape Gmail adds — pulled from this repo's real sample .eml
+    raw = (
+        'mx.google.com; dkim=pass header.i=@kawachi.zaq.ne.jp header.s=default-1th84yt82rvi '
+        'header.b="ZQF9IA/Q"; spf=pass (google.com: domain of kfixc@kawachi.zaq.ne.jp designates '
+        '222.227.81.164 as permitted sender) smtp.mailfrom=kfixc@kawachi.zaq.ne.jp; '
+        'dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=kawachi.zaq.ne.jp'
+    )
+    result = dmarc.parse_authentication_results({"authentication_results": [raw]})
+    assert result == {"dkim": "pass", "spf": "pass", "dmarc": "pass"}
+
+
+def test_parse_authentication_results_missing_header():
+    assert dmarc.parse_authentication_results({"authentication_results": []}) == {}
+
+
+def _mock_txt_rdata(text: str):
+    """Fakes a dnspython TXT rdata object — just enough shape for _txt_to_str."""
+    rdata = MagicMock()
+    rdata.strings = (text.encode("utf-8"),)
+    return rdata
+
+
+@patch("dns.resolver.resolve")
+def test_lookup_dmarc_found(mock_resolve):
+    mock_resolve.return_value = [_mock_txt_rdata("v=DMARC1; p=reject; pct=100; rua=mailto:d@example.com")]
+    result = dmarc.lookup_dmarc("example.com")
+    assert result["found"] is True
+    assert result["policy"] == "reject"
+    assert result["tags"]["rua"] == "mailto:d@example.com"
+    assert result["error"] is None
+
+
+@patch("dns.resolver.resolve")
+def test_lookup_dmarc_definitively_not_found(mock_resolve):
+    import dns.resolver as real_dns_resolver
+    mock_resolve.side_effect = real_dns_resolver.NXDOMAIN()
+    result = dmarc.lookup_dmarc("no-dmarc-example.com")
+    assert result["found"] is False
+    assert result["error"] is None  # definitive "no record" — should count in scoring
+
+
+@patch("dns.resolver.resolve")
+def test_lookup_dmarc_inconclusive_is_not_treated_as_absent(mock_resolve):
+    mock_resolve.side_effect = TimeoutError("simulated DNS timeout")
+    result = dmarc.lookup_dmarc("example.com")
+    assert result["found"] is False
+    assert result["error"] is not None  # inconclusive — must NOT be scored as "no record"
+
+
+def test_scorer_dmarc_fail_reported_by_receiving_server():
+    score, reasons = scorer.calculate_score(
+        [], {}, False, [], auth_results={"dmarc": "fail", "spf": "pass", "dkim": "pass"}
+    )
+    assert score == 35
+    assert any("DMARC fail" in r for r in reasons)
+    # spf/dkim shouldn't ALSO add points once dmarc itself already failed
+    assert not any("SPF fail" in r for r in reasons)
+
+
+def test_scorer_no_dmarc_record_is_a_small_signal():
+    score, reasons = scorer.calculate_score(
+        [], {}, False, [], dmarc_lookup={"found": False, "policy": None, "raw": None, "tags": {}, "error": None}
+    )
+    assert score == 10
+    assert any("no DMARC record" in r for r in reasons)
+
+
+def test_scorer_inconclusive_dmarc_lookup_is_not_scored():
+    score, reasons = scorer.calculate_score(
+        [], {}, False, [],
+        dmarc_lookup={"found": False, "policy": None, "raw": None, "tags": {}, "error": "timeout"},
+    )
+    assert score == 0
+    assert reasons == []
