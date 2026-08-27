@@ -3,7 +3,9 @@ Phishing Email Analyzer
 A Python-based tool that analyzes `.eml` email files to detect 
 phishing indicators, calculate a risk score, and generate reports.
 
-Built and run in Google Colab — no local setup needed.
+Runs two ways:
+- **As a CLI / Python package** (`phishguard/`) — for local use, automation, or integrating into something bigger
+- **As the original notebook** (`phishing_email_analyzer_Public_Code.ipynb`) — still here for a no-install-needed walkthrough in Google Colab
 
 ---
 
@@ -16,7 +18,9 @@ Features
 - **Keyword Detection** — 4 categories: urgency, fear, credential harvesting, financial
 - **Weighted Risk Scoring** — scores emails 0–100 with a clear verdict
 - **Batch Mode** — analyze multiple .eml files at once with a summary table
-- **PDF Export** — generates a styled, downloadable investigation report
+- **PDF Export** — generates a styled, real PDF investigation report (no manual "print to PDF" step)
+- **Persistent History** — every analysis is logged locally (SQLite), so the tool builds its own record of senders/domains seen before, with `phishguard history` and `phishguard stats`
+- **Live Threat Feed Check** — optionally checks URLs in the email body against OpenPhish's free, continuously-updated feed of active phishing URLs
 
 ---
 
@@ -39,7 +43,24 @@ Risk Scoring
 
 ---
 
-How to Run
+How to Run — CLI (recommended)
+
+```bash
+pip install -r requirements.txt
+pip install -e .          # installs the `phishguard` command
+
+phishguard analyze suspicious.eml                    # analyze one email
+phishguard analyze suspicious.eml --pdf report.pdf   # ...and export a PDF
+phishguard batch ./emails --pdf batch_report.pdf     # analyze a whole folder
+phishguard batch ./emails --no-feed                  # skip the live threat-feed check
+
+phishguard history          # see everything analyzed so far
+phishguard stats            # all-time aggregate stats
+```
+
+Every analysis — CLI or batch — is automatically recorded to a local SQLite database (`~/.phishguard/phishguard.db`), so `history` and `stats` build up over time without any extra setup.
+
+How to Run — Google Colab (original notebook)
 
 1. Open the notebook in [Google Colab](https://colab.research.google.com)
 2. Run cells 1–9 top to bottom to load all functions
@@ -49,7 +70,24 @@ How to Run
 
 ---
 
-Project Structure
+Package Structure (CLI version)
+
+| File | Purpose |
+|------|---------|
+| `phishguard/parser.py` | Header parsing, reply-to mismatch, display-name checks |
+| `phishguard/ip_utils.py` | IP extraction + validation from Received headers |
+| `phishguard/keywords.py` | Categorized phishing keyword detection |
+| `phishguard/scorer.py` | Weighted risk scoring + verdict |
+| `phishguard/threat_feed.py` | Optional live OpenPhish feed check for body URLs |
+| `phishguard/database.py` | Persistent local history (SQLite) |
+| `phishguard/report.py` | Terminal report, summary table, PDF export |
+| `phishguard/core.py` | Wires the above into one per-email pipeline |
+| `phishguard/cli.py` | Command-line entry point (`analyze`, `batch`, `history`, `stats`) |
+| `tests/test_core.py` | Unit tests for the detection logic |
+
+> The live threat-feed check uses OpenPhish's free community feed, which is intended for personal/research use — check [their terms](https://openphish.com/phishing_feeds.html) before relying on it in a commercial product.
+
+Notebook Structure (original, still included)
 
 | Cell | Purpose |
 |------|---------|
