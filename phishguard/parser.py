@@ -7,11 +7,83 @@ in detection logic — only the packaging changed.
 import email
 from email.message import Message
 
+from bs4 import BeautifulSoup
+
 
 def load_email(file_path: str) -> Message:
     """Opens and parses a .eml file."""
     with open(file_path, "r", encoding="utf-8", errors="replace") as f:
         return email.message_from_file(f)
+
+
+def _decode_part(part) -> str:
+    """Decodes one MIME part's payload to text, honoring its declared charset."""
+    payload = part.get_payload(decode=True)
+    if not payload:
+        return ""
+    charset = part.get_content_charset() or "utf-8"
+    try:
+        return payload.decode(charset, errors="replace")
+    except (LookupError, UnicodeDecodeError):
+        return payload.decode("utf-8", errors="replace")
+
+
+def _extract_hrefs(html: str) -> list:
+    """Pulls every <a href> destination out of an HTML fragment."""
+    soup = BeautifulSoup(html, "html.parser")
+    return [a["href"] for a in soup.find_all("a", href=True) if a.get("href")]
+
+
+def _html_to_text(html: str) -> str:
+    """Converts an HTML body to plain-ish visible text for keyword scanning."""
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup(["script", "style"]):
+        tag.decompose()
+    return soup.get_text(separator=" ")
+
+
+def extract_body(msg: Message) -> str:
+    """
+    Extracts a plain-text version of the email body — the piece the
+    original notebook got wrong for multipart messages (which is most
+    real-world email, since HTML + plain-text alternatives are standard).
+
+    Main readable text prefers the text/plain part(s); if there aren't any,
+    the text/html part(s) are converted to text instead. Separately, link
+    destinations from ANY html part are always appended, even when a
+    plain-text part was used for the main text — phishing emails often
+    ship a sparse plain-text alternative with generic wording like "click
+    here", while the real URL only exists in the HTML version's href, so
+    relying on the plain-text part alone would silently miss it.
+
+    Actual file attachments (Content-Disposition: attachment) are skipped —
+    this is about the message body, not attachment contents.
+    """
+    if not msg.is_multipart():
+        return _decode_part(msg)
+
+    plain_parts, html_parts = [], []
+    for part in msg.walk():
+        if "attachment" in str(part.get("Content-Disposition", "")).lower():
+            continue
+        content_type = part.get_content_type()
+        if content_type == "text/plain":
+            plain_parts.append(_decode_part(part))
+        elif content_type == "text/html":
+            html_parts.append(_decode_part(part))
+
+    if plain_parts:
+        text = "\n".join(p for p in plain_parts if p)
+    elif html_parts:
+        text = "\n".join(_html_to_text(h) for h in html_parts if h)
+    else:
+        text = ""
+
+    extra_links = [href for h in html_parts for href in _extract_hrefs(h)]
+    if extra_links:
+        text += "\n" + "\n".join(extra_links)
+
+    return text
 
 
 def extract_headers(msg: Message) -> dict:

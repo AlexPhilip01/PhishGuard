@@ -25,7 +25,7 @@ def analyze_single(file_path: str, feed_urls: list = None) -> dict:
         ips = ip_utils.extract_ips(headers["received"], date_header=headers["date"])
         ip_analysis = ip_utils.analyze_ips(ips)
 
-        body = msg.get_payload() if isinstance(msg.get_payload(), str) else ""
+        body = parser.extract_body(msg)
         keyword_findings = keywords.scan_subject_and_body(headers["subject"], body)
 
         feed_matches = None
