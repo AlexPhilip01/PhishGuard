@@ -108,6 +108,15 @@ textarea.eml-input{
 textarea.eml-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(109,40,217,.1)}
 textarea.eml-input::placeholder{color:var(--muted2)}
 
+input.text-input{
+  width:100%;background:var(--surface);
+  border:1px solid var(--border);border-radius:var(--radius);
+  color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;
+  padding:11px 12px;outline:none;transition:border-color .2s;
+}
+input.text-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(109,40,217,.1)}
+input.text-input::placeholder{color:var(--muted2)}
+
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:7px;
   padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;
@@ -431,6 +440,10 @@ iframe.report-frame{width:100%;flex:1;border:none;background:#fff;min-height:0;d
           <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           SMS
         </button>
+        <button class="mode-btn" id="modeDmarcBtn" onclick="setMode('dmarc')">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+          DMARC
+        </button>
       </div>
     </div>
 
@@ -497,6 +510,28 @@ URGENT: Your bank account has been suspended. Verify now: http://bit.ly/secure-b
         <div class="info-box">Detects smishing patterns including suspicious links, urgency tactics, brand impersonation, and financial lures in text messages.</div>
       </div>
     </div>
+
+    <!-- DMARC input panel -->
+    <div id="dmarcPanel" style="display:none;flex-direction:column;flex:1">
+      <div class="sidebar-section">
+        <div class="section-label">Domain to check</div>
+        <input type="text" class="text-input" id="dmarcDomainInput" placeholder="e.g. paypal.com" onkeydown="if(event.key==='Enter')runDmarcCheck()">
+      </div>
+      <div class="sidebar-section" style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn btn-primary" id="dmarcCheckBtn" onclick="runDmarcCheck()">
+          <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Check DMARC
+        </button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sample" style="flex:1" onclick="loadDmarcExample()">Load Example</button>
+          <button class="btn btn-ghost" style="flex:1" onclick="clearDmarc()">Clear</button>
+        </div>
+      </div>
+      <div class="sidebar-section" style="flex:1">
+        <div class="section-label">About</div>
+        <div class="info-box">Looks up a domain's live DMARC policy via DNS — the same record mail servers check to decide whether to trust email claiming to be from that domain. No email needed, just a domain name.</div>
+      </div>
+    </div>
   </div>
 
   <div class="right-panel">
@@ -521,6 +556,9 @@ URGENT: Your bank account has been suspended. Verify now: http://bit.ly/secure-b
       </div>
       <div class="tab" onclick="switchTab('sms')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>SMS Smishing
+      </div>
+      <div class="tab" onclick="switchTab('dmarc')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>DMARC Check
       </div>
     </div>
     <div class="content">
@@ -575,6 +613,13 @@ Or: You've won a $1000 gift card! Claim now: http://prize-claim.xyz/win?id=9482"
           </div>
         </div>
       </div>
+      <div class="tab-pane" id="pane-dmarc">
+        <div class="empty-state">
+          <div class="empty-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg></div>
+          <h3>No domain checked yet</h3>
+          <p>Choose <strong>DMARC</strong> in the sidebar, enter a domain, then click Check DMARC.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -619,6 +664,10 @@ Or: You've won a $1000 gift card! Claim now: http://prize-claim.xyz/win?id=9482"
       <button class="mode-btn" id="mobModeSmsBtn" onclick="mobDrawerMode('sms')">
         <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         SMS
+      </button>
+      <button class="mode-btn" id="mobModeDmarcBtn" onclick="mobDrawerMode('dmarc')">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        DMARC
       </button>
     </div>
   </div>
@@ -667,6 +716,23 @@ URGENT: Your bank account is suspended. Verify: http://bit.ly/secure-bank"></tex
       <button class="btn btn-ghost" style="flex:1" onclick="closeMobDrawers()">Cancel</button>
     </div>
   </div>
+
+  <!-- DMARC content -->
+  <div id="mobDmarcContent" class="mob-drawer-content" style="display:none">
+    <div class="mob-drawer-title" style="padding:8px 0 4px;border:none;font-size:12px;color:var(--muted)">Check DMARC</div>
+    <div>
+      <div class="section-label" style="margin-bottom:8px">Domain to check</div>
+      <input type="text" class="text-input" id="dmarcDomainInputMob" placeholder="e.g. paypal.com">
+    </div>
+    <button class="btn btn-primary" onclick="runMobDmarcCheck()">
+      <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Check DMARC
+    </button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sample" style="flex:1" onclick="document.getElementById('dmarcDomainInputMob').value='google.com'">Load Example</button>
+      <button class="btn btn-ghost" style="flex:1" onclick="closeMobDrawers()">Cancel</button>
+    </div>
+  </div>
 </div>
 
 <!-- Mobile more drawer -->
@@ -683,6 +749,9 @@ URGENT: Your bank account is suspended. Verify: http://bit.ly/secure-bank"></tex
     <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;gap:12px;padding:12px 16px" onclick="mobTab('report');closeMobDrawers()">
       <svg style="width:16px;height:16px;stroke:var(--primary);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Report &amp; Download
     </button>
+    <button class="btn btn-ghost" style="width:100%;justify-content:flex-start;gap:12px;padding:12px 16px" onclick="mobTab('dmarc');closeMobDrawers()">
+      <svg style="width:16px;height:16px;stroke:var(--primary);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>DMARC Check
+    </button>
     <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
       <div class="info-box">PhishGuard analyzes email &amp; SMS messages for phishing indicators. Educational use only.</div>
     </div>
@@ -691,7 +760,7 @@ URGENT: Your bank account is suspended. Verify: http://bit.ly/secure-bank"></tex
 
 <script>
 // ── SMS Smishing Analyzer ──────────────────────────
-const TABS = ['overview','headers','ips','keywords','urls','report','sms'];
+const TABS = ['overview','headers','ips','keywords','urls','report','sms','dmarc'];
 
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', TABS[i] === name));
@@ -1057,10 +1126,10 @@ function runAnalysis() {
     const risk           = calcScore(headerAnalysis.findings, ips, keywords, urls);
     lastResult = { headers: parsed.headers, headerAnalysis, ips, keywords, urls, risk };
 
-    const counts = [null, Object.keys(parsed.headers).length, ips.length, Object.values(keywords).flat().length, urls.length, null];
+    const counts = [null, Object.keys(parsed.headers).length, ips.length, Object.values(keywords).flat().length, urls.length, null, null, null];
     document.querySelectorAll('.tab').forEach((t,i) => {
       const ex = t.querySelector('.tab-count'); if (ex) ex.remove();
-      if (counts[i] !== null) { const b = document.createElement('span'); b.className='tab-count'; b.textContent=counts[i]; t.appendChild(b); }
+      if (counts[i] != null) { const b = document.createElement('span'); b.className='tab-count'; b.textContent=counts[i]; t.appendChild(b); }
     });
 
     document.getElementById('emptyState').style.display = 'none';
@@ -1112,12 +1181,16 @@ function mobSmsMode() {
 function mobDrawerMode(mode) {
   const ec = document.getElementById('mobEmailContent');
   const sc = document.getElementById('mobSmsContent');
+  const dc = document.getElementById('mobDmarcContent');
   ec.style.display = mode==='email' ? 'flex' : 'none';
   ec.style.flexDirection = 'column';
   sc.style.display = mode==='sms' ? 'flex' : 'none';
   sc.style.flexDirection = 'column';
+  dc.style.display = mode==='dmarc' ? 'flex' : 'none';
+  dc.style.flexDirection = 'column';
   document.getElementById('mobModeEmailBtn').classList.toggle('active', mode==='email');
   document.getElementById('mobModeSmsBtn').classList.toggle('active', mode==='sms');
+  document.getElementById('mobModeDmarcBtn').classList.toggle('active', mode==='dmarc');
 }
 
 function openMobInput() {
@@ -1184,6 +1257,18 @@ function runMobSmsAnalysis() {
   }, 300);
 }
 
+function runMobDmarcCheck() {
+  const raw = document.getElementById('dmarcDomainInputMob').value;
+  const domain = normalizeDomainInput(raw);
+  if (!domain) { alert('Please enter a domain first.'); return; }
+  const sidebarInput = document.getElementById('dmarcDomainInput');
+  if (sidebarInput) sidebarInput.value = raw.trim();
+  closeMobDrawers();
+  mobTab('dmarc');
+  // reuse the same button element as the desktop check so the spinner/disable state is consistent
+  runDmarcCheckFor(domain, document.getElementById('dmarcCheckBtn'), document.getElementById('pane-dmarc'));
+}
+
 emlText.addEventListener('input', () => { const mob = document.getElementById('emlTextMob'); if (mob) mob.value = emlText.value; });
 
 // Show mobile elements only on small screens
@@ -1204,13 +1289,154 @@ function setMode(mode) {
   document.getElementById('emailPanel').style.display = mode === 'email' ? 'flex' : 'none';
   document.getElementById('emailPanel').style.flexDirection = 'column';
   document.getElementById('smsPanel').style.display = mode === 'sms' ? 'flex' : 'none';
+  document.getElementById('dmarcPanel').style.display = mode === 'dmarc' ? 'flex' : 'none';
   document.getElementById('modeEmailBtn').classList.toggle('active', mode === 'email');
   document.getElementById('modeSmsBtn').classList.toggle('active', mode === 'sms');
+  document.getElementById('modeDmarcBtn').classList.toggle('active', mode === 'dmarc');
   if (mode === 'sms') {
     switchTab('sms');
+  } else if (mode === 'dmarc') {
+    switchTab('dmarc');
   } else {
     switchTab('overview');
   }
+}
+
+// ── DMARC Checker ──────────────────────────────────
+// Browsers can't make raw DNS queries, so this uses Google's public
+// DNS-over-HTTPS JSON endpoint (dns.google/resolve) — the same _dmarc.
+// TXT lookup the phishguard Python CLI does, just callable from client-side JS.
+function decodeTxtData(raw) {
+  // A TXT record's DoH "data" field is one quoted string, or several
+  // quoted chunks separated by spaces for very long records — stitch
+  // multi-chunk ones back into one string either way.
+  return raw.replace(/"\s+"/g, '').replace(/^"|"$/g, '');
+}
+
+function parseDmarcTags(record) {
+  const tags = {};
+  record.split(';').forEach(part => {
+    const idx = part.indexOf('=');
+    if (idx > -1) tags[part.slice(0, idx).trim().toLowerCase()] = part.slice(idx + 1).trim();
+  });
+  return tags;
+}
+
+async function fetchDmarcRecord(domain) {
+  const url = `https://dns.google/resolve?name=${encodeURIComponent('_dmarc.' + domain)}&type=TXT`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('DNS request failed (' + res.status + ')');
+  const data = await res.json();
+  if (data.Status === 3) return { found: false, reason: 'nxdomain' }; // NXDOMAIN — domain has no DMARC record
+  const answers = (data.Answer || []).filter(a => a.type === 16);
+  for (const a of answers) {
+    const txt = decodeTxtData(a.data);
+    if (/^v=dmarc1/i.test(txt)) return { found: true, raw: txt, tags: parseDmarcTags(txt) };
+  }
+  return { found: false, reason: 'no-record' }; // resolved, but no DMARC1 TXT record present
+}
+
+function dmarcPolicyNote(p) {
+  const notes = {
+    reject: 'Strictest setting — mail failing DMARC alignment should be blocked outright.',
+    quarantine: 'Moderate — mail failing alignment should be sent to spam/junk.',
+    none: "Monitoring only — failing mail is still delivered normally; this domain isn't enforcing anything yet.",
+  };
+  return notes[p] || '';
+}
+
+function renderDmarcResult(domain, result) {
+  if (result.found) {
+    const t = result.tags;
+    const policy = t.p || 'none';
+    const flagCls = policy === 'reject' ? 'flag-ok' : 'flag-warn';
+    const rows = ['p','sp','pct','rua','ruf','adkim','aspf']
+      .filter(k => t[k])
+      .map(k => `<div class="hdr-row"><div class="hkey">${k}</div><div class="hval">${t[k]}</div></div>`)
+      .join('');
+    const note = dmarcPolicyNote(policy);
+    return `
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon icon-green">${icon('check')}</div>
+          <h3>DMARC record found — ${domain}</h3>
+          <div class="hflag ${flagCls}" style="margin-left:auto">p=${policy}</div>
+        </div>
+        <div class="card-body">
+          ${rows}
+          <div class="hdr-row"><div class="hkey">raw</div><div class="hval" style="font-family:'IBM Plex Mono',monospace;font-size:11px;word-break:break-all">${result.raw}</div></div>
+        </div>
+      </div>
+      ${note ? `<div class="info-box">${note}</div>` : ''}`;
+  }
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon icon-red">${icon('warning')}</div>
+        <h3>No DMARC record — ${domain}</h3>
+      </div>
+      <div class="card-body">
+        <p class="no-findings">This domain has no DMARC record published. Mail claiming to be from it has no DMARC-based protection against spoofing — a receiving mail server has nothing to check failed authentication against.</p>
+      </div>
+    </div>`;
+}
+
+function renderDmarcError(domain, message) {
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-header-icon icon-yellow">${icon('warning')}</div>
+        <h3>Lookup didn't complete — ${domain}</h3>
+      </div>
+      <div class="card-body">
+        <p class="no-findings">${message} This isn't a "no record" result — it just means the check couldn't finish. Check your connection and try again.</p>
+      </div>
+    </div>`;
+}
+
+function normalizeDomainInput(raw) {
+  return raw.trim().toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/^mailto:/, '')
+    .replace(/\/.*$/, '')
+    .replace(/^www\./, '')
+    .replace(/^[^@]*@/, ''); // in case someone pastes a full email address
+}
+
+async function runDmarcCheckFor(domain, btn, pane) {
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = '<svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:spin 1s linear infinite;flex-shrink:0" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Checking...';
+  if (!document.getElementById('spinStyle')) { const s = document.createElement('style'); s.id='spinStyle'; s.textContent='@keyframes spin{to{transform:rotate(360deg)}}'; document.head.appendChild(s); }
+
+  pane.innerHTML = `<div class="empty-state"><div class="empty-icon">${icon('globe')}</div><h3>Looking up ${domain}…</h3><p>Querying DNS for a DMARC record.</p></div>`;
+
+  try {
+    const result = await fetchDmarcRecord(domain);
+    pane.innerHTML = renderDmarcResult(domain, result);
+  } catch (e) {
+    pane.innerHTML = renderDmarcError(domain, e.message || 'The DNS lookup failed.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHTML;
+  }
+}
+
+function runDmarcCheck() {
+  const input = document.getElementById('dmarcDomainInput');
+  const domain = normalizeDomainInput(input.value);
+  if (!domain) { alert('Please enter a domain first.'); return; }
+  switchTab('dmarc');
+  runDmarcCheckFor(domain, document.getElementById('dmarcCheckBtn'), document.getElementById('pane-dmarc'));
+}
+
+function loadDmarcExample() {
+  document.getElementById('dmarcDomainInput').value = 'google.com';
+}
+
+function clearDmarc() {
+  document.getElementById('dmarcDomainInput').value = '';
+  document.getElementById('pane-dmarc').innerHTML = `<div class="empty-state"><div class="empty-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg></div><h3>No domain checked yet</h3><p>Choose <strong>DMARC</strong> in the sidebar, enter a domain, then click Check DMARC.</p></div>`;
 }
 
 function loadSmsSidebar() {
