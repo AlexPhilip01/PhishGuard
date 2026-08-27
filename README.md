@@ -21,6 +21,7 @@ Features
 - **PDF Export** — generates a styled, real PDF investigation report (no manual "print to PDF" step)
 - **Persistent History** — every analysis is logged locally (SQLite), so the tool builds its own record of senders/domains seen before, with `phishguard history` and `phishguard stats`
 - **Live Threat Feed Check** — optionally checks URLs in the email body against OpenPhish's free, continuously-updated feed of active phishing URLs
+- **DMARC / SPF / DKIM Check** — reads any `Authentication-Results` header the receiving mail server already added, and independently looks up the sender domain's live DMARC policy via DNS. Also works standalone for any domain: `phishguard check-domain <domain>`
 
 ---
 
@@ -56,9 +57,11 @@ phishguard batch ./emails --no-feed                  # skip the live threat-feed
 
 phishguard history          # see everything analyzed so far
 phishguard stats            # all-time aggregate stats
+
+phishguard check-domain paypal.com    # check any domain's DMARC policy, standalone
 ```
 
-Every analysis — CLI or batch — is automatically recorded to a local SQLite database (`~/.phishguard/phishguard.db`), so `history` and `stats` build up over time without any extra setup.
+Every analysis — CLI or batch — is automatically recorded to a local SQLite database (`~/.phishguard/phishguard.db`), so `history` and `stats` build up over time without any extra setup. Add `--no-feed` and/or `--no-dmarc` to `analyze`/`batch` to skip the network-dependent checks.
 
 How to Run — Google Colab (original notebook)
 
@@ -79,6 +82,7 @@ Package Structure (CLI version)
 | `phishguard/keywords.py` | Categorized phishing keyword detection |
 | `phishguard/scorer.py` | Weighted risk scoring + verdict |
 | `phishguard/threat_feed.py` | Optional live OpenPhish feed check for body URLs |
+| `phishguard/dmarc.py` | Authentication-Results parsing + live DMARC DNS lookup |
 | `phishguard/database.py` | Persistent local history (SQLite) |
 | `phishguard/report.py` | Terminal report, summary table, PDF export |
 | `phishguard/core.py` | Wires the above into one per-email pipeline |
