@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+emails/
+*.pdf
+!phishing-preview.png
+
+# Local PhishGuard data (history db + cached threat feed) — not for git
+.phishguard/
