@@ -2,11 +2,12 @@
 Basic tests for the core detection logic. Run with:  pytest
 """
 import sys
+from email.message import EmailMessage
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from phishguard import ip_utils, keywords, parser, scorer  # noqa: E402
+from phishguard import ip_utils, keywords, parser, scorer, threat_feed  # noqa: E402
 
 
 def test_valid_ip():
@@ -73,3 +74,64 @@ def test_feed_match_boosts_score():
     score_with, reasons_with = scorer.calculate_score([], {}, False, [], feed_matches=["http://bad.example/login"])
     assert score_with == score_without + 40
     assert any("threat feed" in r for r in reasons_with)
+
+
+# --- Body extraction: the multipart/HTML fix ---------------------------
+
+def test_extract_body_simple_plain_text():
+    msg = EmailMessage()
+    msg["Subject"] = "test"
+    msg.set_content("please verify your password now")
+    assert "verify your password" in parser.extract_body(msg)
+
+
+def test_extract_body_multipart_prefers_plain_text():
+    """The exact bug that used to make body scanning silently do nothing."""
+    msg = EmailMessage()
+    msg["Subject"] = "test"
+    msg.set_content("plain text: please confirm your credentials")
+    msg.add_alternative(
+        "<html><body><p>html: please <b>confirm</b> your credentials</p></body></html>",
+        subtype="html",
+    )
+    assert msg.is_multipart()  # sanity check this is actually the multipart case
+    body = parser.extract_body(msg)
+    assert "confirm your credentials" in body
+
+
+def test_extract_body_html_only_falls_back_and_keeps_link_urls():
+    msg = EmailMessage()
+    msg["Subject"] = "test"
+    msg.set_content(
+        "<html><body><p>Your account is locked.</p>"
+        '<a href="http://paypa1-security.com/login">Click here</a>'
+        "</body></html>",
+        subtype="html",
+    )
+    body = parser.extract_body(msg)
+    assert "locked" in body
+    # the href itself must survive even though the visible link text doesn't mention it
+    assert "http://paypa1-security.com/login" in body
+
+
+def test_multipart_email_keywords_and_feed_url_are_now_detected():
+    """End-to-end: a realistic multipart phishing email should now be
+    fully scanned, not just its subject line."""
+    msg = EmailMessage()
+    msg["Subject"] = "Please review"
+    msg["From"] = "Alerts <alerts@example.com>"
+    msg.set_content("Your account has been compromised, verify your credentials now.")
+    msg.add_alternative(
+        '<html><body><p>Your account has been compromised.</p>'
+        '<a href="http://paypa1-security.com/login">Verify now</a></body></html>',
+        subtype="html",
+    )
+
+    body = parser.extract_body(msg)
+    findings = keywords.scan_subject_and_body(msg["Subject"], body)
+    assert "fear" in findings          # "compromised" — only in the body, not the subject
+    assert "credential_harvesting" in findings
+
+    urls = threat_feed.extract_urls(body)
+    matches = threat_feed.check_urls_against_feed(urls, ["http://paypa1-security.com/login"])
+    assert matches == ["http://paypa1-security.com/login"]
