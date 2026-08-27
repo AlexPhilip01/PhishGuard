@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
     "xhtml2pdf>=0.2.14",
+    "beautifulsoup4>=4.12",
 ]
 
 [project.scripts]

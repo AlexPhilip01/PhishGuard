@@ -15,7 +15,7 @@ Features
 - **IP Extraction** — pulls IPs from Received headers with false positive filtering
 - **Display Name Detection** — flags alarm words like "HACKED" or "SUSPENDED"
 - **Reply-To Mismatch** — detects when reply domain differs from sender domain
-- **Keyword Detection** — 4 categories: urgency, fear, credential harvesting, financial
+- **Keyword Detection** — 4 categories: urgency, fear, credential harvesting, financial. Reads both plain-text and HTML email bodies (including link URLs hidden behind text like "Click here"), not just plain-text
 - **Weighted Risk Scoring** — scores emails 0–100 with a clear verdict
 - **Batch Mode** — analyze multiple .eml files at once with a summary table
 - **PDF Export** — generates a styled, real PDF investigation report (no manual "print to PDF" step)
