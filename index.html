@@ -1336,49 +1336,113 @@ async function fetchDmarcRecord(domain) {
   return { found: false, reason: 'no-record' }; // resolved, but no DMARC1 TXT record present
 }
 
-function dmarcPolicyNote(p) {
-  const notes = {
-    reject: 'Strictest setting — mail failing DMARC alignment should be blocked outright.',
-    quarantine: 'Moderate — mail failing alignment should be sent to spam/junk.',
-    none: "Monitoring only — failing mail is still delivered normally; this domain isn't enforcing anything yet.",
-  };
-  return notes[p] || '';
+function calcDmarcScore(result) {
+  // My own simple heuristic (not EasyDMARC's algorithm, which isn't public) —
+  // framed as a Risk Score to match the convention used everywhere else in
+  // this app: higher = more exploitable, not a "health grade".
+  if (!result.found) return { score: 85, level: 'HIGH' };
+  const policy = (result.tags.p || 'none').toLowerCase();
+  const score = policy === 'reject' ? 8 : policy === 'quarantine' ? 35 : 55;
+  const level = score >= 60 ? 'HIGH' : score >= 30 ? 'MEDIUM' : 'LOW';
+  return { score, level };
+}
+
+function dmarcFindings(domain, result) {
+  if (!result.found) {
+    return [{ text: `${domain} has no DMARC record — anyone can send email that appears to come from this domain, with no authentication check in place`, severity: 'high' }];
+  }
+  const t = result.tags, findings = [];
+  const policy = (t.p || 'none').toLowerCase();
+
+  if (policy === 'reject') findings.push({ text: 'Policy is p=reject — mail that fails authentication is blocked outright', severity: 'low' });
+  else if (policy === 'quarantine') findings.push({ text: "Policy is p=quarantine — failing mail is sent to spam, not blocked. Worth moving to reject once you're confident in the setup", severity: 'medium' });
+  else findings.push({ text: "Policy is p=none — failing mail is still delivered normally. This monitors, it doesn't protect", severity: 'high' });
+
+  if (t.rua) findings.push({ text: "Aggregate reports configured (rua) — there's visibility into who's sending mail as this domain", severity: 'low' });
+  else findings.push({ text: 'No rua (aggregate report) address set — no visibility into spoofing attempts against this domain', severity: 'medium' });
+
+  if (t.sp && t.sp.toLowerCase() !== policy) {
+    findings.push({ text: `Subdomain policy (sp=${t.sp}) differs from the main policy`, severity: t.sp.toLowerCase()==='reject' ? 'low' : 'medium' });
+  }
+  if (t.pct && t.pct !== '100') {
+    findings.push({ text: `Policy only applies to ${t.pct}% of failing mail (pct=${t.pct}) — the rest falls back to a lighter policy`, severity: 'medium' });
+  }
+  return findings;
+}
+
+const DMARC_TAG_GLOSSARY = {
+  v: 'Record version. Must read exactly "DMARC1" or mail servers ignore the whole record.',
+  p: 'Policy for the domain itself: none (monitor only), quarantine (send to spam), or reject (block outright).',
+  sp: 'Policy specifically for subdomains, when it should differ from the main policy.',
+  rua: 'Mailbox that receives aggregate (summary) authentication reports.',
+  ruf: 'Mailbox that receives forensic (per-message failure) reports.',
+  pct: 'Percentage of failing mail the policy applies to — the remainder falls back to a lighter policy.',
+  adkim: 'How strictly the DKIM domain must match the From address: r (relaxed) or s (strict).',
+  aspf: 'How strictly the SPF domain must match the From address: r (relaxed) or s (strict).',
+  fo: 'Which failure events trigger a forensic report (only relevant if ruf is set).',
+};
+
+function renderDmarcTagGlossary(tags) {
+  const present = Object.keys(DMARC_TAG_GLOSSARY).filter(k => tags[k] !== undefined);
+  if (!present.length) return '';
+  const rows = present.map(k => `<div class="hdr-row"><div class="hkey">${k}=${tags[k]}</div><div class="hval">${DMARC_TAG_GLOSSARY[k]}</div></div>`).join('');
+  return `<div class="card"><div class="card-header"><div class="card-header-icon icon-indigo">${icon('type')}</div><h3>Understanding These Tags</h3></div><div class="card-body">${rows}</div></div>`;
 }
 
 function renderDmarcResult(domain, result) {
-  if (result.found) {
-    const t = result.tags;
-    const policy = t.p || 'none';
-    const flagCls = policy === 'reject' ? 'flag-ok' : 'flag-warn';
-    const rows = ['p','sp','pct','rua','ruf','adkim','aspf']
-      .filter(k => t[k])
-      .map(k => `<div class="hdr-row"><div class="hkey">${k}</div><div class="hval">${t[k]}</div></div>`)
-      .join('');
-    const note = dmarcPolicyNote(policy);
-    return `
-      <div class="card">
-        <div class="card-header">
-          <div class="card-header-icon icon-green">${icon('check')}</div>
-          <h3>DMARC record found — ${domain}</h3>
-          <div class="hflag ${flagCls}" style="margin-left:auto">p=${policy}</div>
-        </div>
-        <div class="card-body">
-          ${rows}
-          <div class="hdr-row"><div class="hkey">raw</div><div class="hval" style="font-family:'IBM Plex Mono',monospace;font-size:11px;word-break:break-all">${result.raw}</div></div>
-        </div>
+  const { score, level } = calcDmarcScore(result);
+  const color = riskColor(level);
+  const circ = 2*Math.PI*36, dash = (score/100)*circ;
+  const findings = dmarcFindings(domain, result);
+  const dotCol = sev => sev==='high'?'#be123c':sev==='medium'?'#b45309':'#15803d';
+  const findingsHTML = findings.map(f=>`<div class="finding-row"><div class="finding-dot" style="background:${dotCol(f.severity)}"></div><div class="finding-text">${f.text}</div><div class="sev-badge sev-${f.severity}">${f.severity}</div></div>`).join('');
+
+  const policy = result.found ? (result.tags.p || 'none') : '—';
+  const reporting = result.found ? (result.tags.rua ? 'Configured' : 'Not set') : '—';
+  const subdomain = result.found ? (result.tags.sp || 'Inherits main policy') : '—';
+  const alignment = result.found ? ((result.tags.adkim==='s'||result.tags.aspf==='s') ? 'Strict' : 'Relaxed (default)') : '—';
+
+  const heroHTML = `
+    <div class="score-hero">
+      <div class="score-ring">
+        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="40" cy="40" r="36" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="8"/>
+          <circle cx="40" cy="40" r="36" fill="none" stroke="${color}" stroke-width="8" stroke-dasharray="${dash.toFixed(1)} ${circ.toFixed(1)}" stroke-linecap="round"/>
+        </svg>
+        <div class="score-num">${score}</div>
       </div>
-      ${note ? `<div class="info-box">${note}</div>` : ''}`;
-  }
-  return `
+      <div class="score-details">
+        <h2>DMARC Risk Score: ${score}/100</h2>
+        <p>${findings.length} configuration note(s)</p>
+        <div class="score-meta">Domain: ${domain}</div>
+        <div class="score-meta">Policy: ${result.found ? 'p=' + policy : 'No record found'}</div>
+      </div>
+      <div class="risk-pill risk-${level}">${level} RISK</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon">${icon('shield')}</div><div class="stat-val" style="font-size:15px">${policy}</div><div class="stat-label">Policy</div></div>
+      <div class="stat-card"><div class="stat-icon">${icon('file')}</div><div class="stat-val" style="font-size:15px">${reporting}</div><div class="stat-label">Reporting</div></div>
+      <div class="stat-card"><div class="stat-icon">${icon('server')}</div><div class="stat-val" style="font-size:13px">${subdomain}</div><div class="stat-label">Subdomain Policy</div></div>
+      <div class="stat-card"><div class="stat-icon">${icon('key')}</div><div class="stat-val" style="font-size:15px">${alignment}</div><div class="stat-label">Alignment</div></div>
+    </div>
     <div class="card">
-      <div class="card-header">
-        <div class="card-header-icon icon-red">${icon('warning')}</div>
-        <h3>No DMARC record — ${domain}</h3>
-      </div>
+      <div class="card-header"><div class="card-header-icon icon-purple">${icon('warning')}</div><h3>Configuration Notes</h3><div class="count">${findings.length} found</div></div>
+      <div class="card-body">${findingsHTML}</div>
+    </div>`;
+
+  const rawCard = result.found ? `
+    <div class="card">
+      <div class="card-header"><div class="card-header-icon icon-green">${icon('check')}</div><h3>Raw DNS Record</h3></div>
+      <div class="card-body"><div class="hdr-row"><div class="hval" style="font-family:'IBM Plex Mono',monospace;font-size:11px;word-break:break-all">${result.raw}</div></div></div>
+    </div>` : `
+    <div class="card">
+      <div class="card-header"><div class="card-header-icon icon-red">${icon('warning')}</div><h3>No Record Published</h3></div>
       <div class="card-body">
-        <p class="no-findings">This domain has no DMARC record published. Mail claiming to be from it has no DMARC-based protection against spoofing — a receiving mail server has nothing to check failed authentication against.</p>
+        <p class="no-findings">A minimal starting record looks like: <span style="font-family:'IBM Plex Mono',monospace;background:var(--surface);padding:2px 6px;border-radius:4px;font-size:11.5px">v=DMARC1; p=none; rua=mailto:you@${domain}</span> — start in monitoring mode, review the reports, then move to quarantine and eventually reject.</p>
       </div>
     </div>`;
+
+  return heroHTML + rawCard + (result.found ? renderDmarcTagGlossary(result.tags) : '');
 }
 
 function renderDmarcError(domain, message) {
