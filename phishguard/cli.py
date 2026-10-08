@@ -14,6 +14,7 @@ Examples:
     phishguard batch ./emails --no-feed        # skip the live threat-feed check
     phishguard analyze suspicious.eml --feeds phishing-database   # use one feed only
     phishguard update-feeds                    # refresh the live threat feeds now
+    phishguard build-snapshot --out feeds      # compact feed snapshot for the website
     phishguard history --limit 20
     phishguard stats
 """
@@ -21,6 +22,7 @@ import argparse
 import glob
 import os
 import sys
+from pathlib import Path
 
 from . import database, dmarc, report, threat_feed
 from .core import analyze_single
@@ -144,6 +146,19 @@ def cmd_update_feeds(args):
         sys.exit(1)
 
 
+def cmd_build_snapshot(args):
+    """Build the compact browser snapshot (used by the scheduled GitHub workflow)."""
+    from . import snapshot
+    names = _parse_feed_names(args.feeds) or snapshot.SNAPSHOT_DEFAULT_FEEDS
+    try:
+        meta = snapshot.build_snapshot(args.out, sources=names)
+    except RuntimeError as e:
+        print(f"❌ {e}", file=sys.stderr)
+        sys.exit(1)
+    size = (Path(args.out) / snapshot.BIN_NAME).stat().st_size
+    print(f"✅ Snapshot written to {args.out}: {meta['entries']:,} fingerprints, {size/1e6:.1f} MB")
+
+
 def cmd_check_domain(args):
     """Standalone DMARC (+ auth header context) check for any domain — not
     tied to analyzing a specific email."""
@@ -231,6 +246,11 @@ def main():
     p_update = sub.add_parser("update-feeds", help="Download the latest copy of the live threat feeds")
     p_update.add_argument("--feeds", help="Comma-separated feeds to refresh (default: all)")
     p_update.set_defaults(func=cmd_update_feeds)
+
+    p_snap = sub.add_parser("build-snapshot", help="Build the compact threat-feed snapshot used by the website")
+    p_snap.add_argument("--out", default="feeds", help="Output folder (default: feeds)")
+    p_snap.add_argument("--feeds", default=None, help="Comma-separated feeds (default: phishing-database)")
+    p_snap.set_defaults(func=cmd_build_snapshot)
 
     p_domain = sub.add_parser("check-domain", help="Check the DMARC record for any domain, standalone")
     p_domain.add_argument("domain", help="Domain to check, e.g. example.com")

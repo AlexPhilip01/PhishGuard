@@ -21,6 +21,7 @@ Features
 - **PDF Export** — generates a styled, real PDF investigation report (no manual "print to PDF" step)
 - **Persistent History** — every analysis is logged locally (SQLite), so the tool builds its own record of senders/domains seen before, with `phishguard history` and `phishguard stats`
 - **Live Threat Feeds** — checks URLs in the email body against continuously-updated public phishing feeds: [Phishing.Database](https://github.com/Phishing-Database/Phishing.Database) (~390k active phishing domains) and the OpenPhish community feed. Feeds are cached locally and refreshed automatically when stale, so every run uses current data. Matching is deliberately conservative: shared platforms (Google Sites, GitHub Pages, IPFS gateways, S3 endpoints…) are never flagged wholesale — only specifically-listed hosts or URLs are.
+- **Live feed on the website** — a scheduled GitHub Action (`.github/workflows/update-feeds.yml`, every 6 hours) publishes a ~2 MB fingerprint snapshot of the Phishing.Database list to a `feed-data` branch. The website downloads it in the background and flags links on the list (+40 risk) in both Email and SMS modes, using the same conservative matching rules as the CLI. Only fingerprints are shipped, not the list, and if the snapshot can't be loaded the site's other checks still work. Run `phishguard build-snapshot --out feeds` to build one yourself.
 - **DMARC / SPF / DKIM Check** — reads any `Authentication-Results` header the receiving mail server already added, and independently looks up the sender domain's live DMARC policy via DNS. Also works standalone for any domain: `phishguard check-domain <domain>`
 
 ---
@@ -56,6 +57,7 @@ phishguard batch ./emails --pdf batch_report.pdf     # analyze a whole folder
 phishguard batch ./emails --no-feed                  # skip the live threat-feed check
 phishguard analyze suspicious.eml --feeds phishing-database   # use only one feed
 phishguard update-feeds                              # refresh the live feeds right now
+phishguard build-snapshot --out feeds                # compact snapshot for the website (used by the scheduled workflow)
 
 phishguard history          # see everything analyzed so far
 phishguard stats            # all-time aggregate stats
@@ -90,6 +92,8 @@ Package Structure (CLI version)
 | `phishguard/core.py` | Wires the above into one per-email pipeline |
 | `phishguard/cli.py` | Command-line entry point (`analyze`, `batch`, `history`, `stats`) |
 | `tests/test_core.py` | Unit tests for the detection logic |
+| `phishguard/snapshot.py` | Builds the compact browser snapshot (hashed host fingerprints + matching rules) |
+| `tests/test_snapshot.py` | Tests for the snapshot builder, including refusal to publish an empty or stale snapshot |
 | `tests/test_feeds.py` | Tests for feed matching, shared-platform protection, caching and offline behaviour (no network needed) |
 
 > **Feed licensing:** the OpenPhish community feed is for non-commercial use only ([terms](https://openphish.com/terms.html)) — if you build PhishGuard into a commercial product, use `--feeds phishing-database` or buy an OpenPhish commercial licence. Phishing.Database is community-maintained; check its repository's LICENSE before commercial use.
