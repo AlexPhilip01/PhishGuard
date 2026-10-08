@@ -21,6 +21,7 @@ Features
 - **PDF Export** — generates a styled, real PDF investigation report (no manual "print to PDF" step)
 - **Persistent History** — every analysis is logged locally (SQLite), so the tool builds its own record of senders/domains seen before, with `phishguard history` and `phishguard stats`
 - **Live Threat Feeds** — checks URLs in the email body against continuously-updated public phishing feeds: [Phishing.Database](https://github.com/Phishing-Database/Phishing.Database) (~390k active phishing domains) and the OpenPhish community feed. Feeds are cached locally and refreshed automatically when stale, so every run uses current data. Matching is deliberately conservative: shared platforms (Google Sites, GitHub Pages, IPFS gateways, S3 endpoints…) are never flagged wholesale — only specifically-listed hosts or URLs are.
+- **Look-alike domain detection** — catches brand impersonation that is too new to be on any threat feed: digit/letter swaps (`paypa1`, `micr0soft`, `rn` for `m`), Cyrillic look-alike letters, one-typo names (`paypall`), brands hidden in subdomains (`paypal.com.evil.xyz`) and brand-plus-keyword domains (`secure-paypal-login.com`). Checks the sender, Reply-To and every link, in the CLI and on the website (+25 strong / +15 moderate, applied once). Real brand domains and their CDN/mail domains are allowlisted, and a bare brand name on a country domain (`amazon.in`) is left alone. It is a heuristic, so results read "may impersonate".
 - **Live feed on the website** — a scheduled GitHub Action (`.github/workflows/update-feeds.yml`, every 6 hours) publishes a ~2 MB fingerprint snapshot of the Phishing.Database list to a `feed-data` branch. The website downloads it in the background and flags links on the list (+40 risk) in both Email and SMS modes, using the same conservative matching rules as the CLI. Only fingerprints are shipped, not the list, and if the snapshot can't be loaded the site's other checks still work. Run `phishguard build-snapshot --out feeds` to build one yourself.
 - **DMARC / SPF / DKIM Check** — reads any `Authentication-Results` header the receiving mail server already added, and independently looks up the sender domain's live DMARC policy via DNS. Also works standalone for any domain: `phishguard check-domain <domain>`
 
@@ -92,6 +93,8 @@ Package Structure (CLI version)
 | `phishguard/core.py` | Wires the above into one per-email pipeline |
 | `phishguard/cli.py` | Command-line entry point (`analyze`, `batch`, `history`, `stats`) |
 | `tests/test_core.py` | Unit tests for the detection logic |
+| `phishguard/lookalike.py` | Look-alike / brand-impersonation domain detection (mirrored in `index.html`) |
+| `tests/test_lookalike.py` | Tests for look-alike detection, scoring, and a check that the website's copy of the brand list matches |
 | `phishguard/snapshot.py` | Builds the compact browser snapshot (hashed host fingerprints + matching rules) |
 | `tests/test_snapshot.py` | Tests for the snapshot builder, including refusal to publish an empty or stale snapshot |
 | `tests/test_feeds.py` | Tests for feed matching, shared-platform protection, caching and offline behaviour (no network needed) |

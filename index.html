@@ -961,6 +961,151 @@ function detectKeywords(text) {
   return found;
 }
 
+// ── Look-alike (impersonation) domain detection — mirrors phishguard/lookalike.py ──
+const LOOKALIKE_DATA = /*LOOKALIKE_DATA_START*/{"brands":{"paypal":["paypal.com","paypal.me","paypalobjects.com","paypal-community.com","paypalcorp.com"],"amazon":["amazon.com","amazonaws.com","amazon-adsystem.com","media-amazon.com","ssl-images-amazon.com","amazonses.com","amazontrust.com","amazon.jobs","amazon.science","amazonpay.com","a2z.com"],"microsoft":["microsoft.com","microsoftonline.com","microsoftstore.com","live.com","office.com","office.net","office365.com","outlook.com","sharepoint.com","windows.com","windows.net","azure.com","azureedge.net","azurewebsites.net","msn.com","bing.com","skype.com","xbox.com","onedrive.com","msauth.net","msftauth.net","microsoftazuread-sso.com"],"google":["google.com","gmail.com","googlemail.com","googleapis.com","gstatic.com","googleusercontent.com","googletagmanager.com","googleadservices.com","googlesyndication.com","googlevideo.com","google-analytics.com","googletagservices.com","doubleclick.net","youtube.com","goo.gl","withgoogle.com"],"apple":["apple.com","icloud.com","icloud-content.com","itunes.com","mzstatic.com","cdn-apple.com","apple-dns.net","appleid.com"],"netflix":["netflix.com","nflxext.com","nflximg.net","nflxvideo.net","nflxso.net","netflix.net"],"facebook":["facebook.com","facebookmail.com","facebook.net","fb.com","fb.me","fbcdn.net","fbsbx.com","meta.com","messenger.com","workplace.com"],"instagram":["instagram.com","cdninstagram.com"],"whatsapp":["whatsapp.com","whatsapp.net"],"linkedin":["linkedin.com","licdn.com"],"twitter":["twitter.com","x.com","t.co","twimg.com"],"dropbox":["dropbox.com","dropboxusercontent.com","dropboxmail.com"],"docusign":["docusign.com","docusign.net"],"adobe":["adobe.com","adobelogin.com","adobe.io"],"zoom":["zoom.us","zoom.com","zoomgov.com"],"dhl":["dhl.com","dhl.de","dhl-usa.com"],"fedex":["fedex.com"],"ups":["ups.com"],"usps":["usps.com","usps.gov"],"chase":["chase.com","jpmorgan.com","jpmorganchase.com"],"wellsfargo":["wellsfargo.com","wf.com"],"bankofamerica":["bankofamerica.com","bofa.com","ml.com"],"citibank":["citibank.com","citi.com","citigroup.com"],"hsbc":["hsbc.com","hsbc.co.uk","hsbc.com.hk","hsbc.co.in"],"barclays":["barclays.com","barclays.co.uk","barclaycard.co.uk"],"hdfcbank":["hdfcbank.com","hdfc.com"],"icicibank":["icicibank.com"],"axisbank":["axisbank.com"],"onlinesbi":["onlinesbi.sbi","sbi.co.in","sbicard.com","onlinesbi.com"],"paytm":["paytm.com","paytmbank.com"],"phonepe":["phonepe.com"],"coinbase":["coinbase.com","coinbasecloud.net"],"binance":["binance.com","binance.us"],"metamask":["metamask.io"],"steam":["steampowered.com","steamcommunity.com","steamstatic.com","valvesoftware.com"],"ebay":["ebay.com","ebaystatic.com","ebayimg.com"],"walmart":["walmart.com","walmartimages.com"],"irs":["irs.gov"],"stripe":["stripe.com","stripe.network","stripecdn.com"],"github":["github.com","githubusercontent.com","githubassets.com","githubstatus.com"],"slack":["slack.com","slack-edge.com"]},"aliases":{"outlook":"microsoft","office365":"microsoft","onedrive":"microsoft","sharepoint":"microsoft","hdfc":"hdfcbank","sbi":"onlinesbi","gmail":"google","icloud":"apple","appleid":"apple"},"known_legit_nearby":["applet.com","paypay.co.jp","paypay.ne.jp","zooms.com"],"confusables":{"а":"a","е":"e","о":"o","р":"p","с":"c","х":"x","у":"y","і":"i","ј":"j","ѕ":"s","ԁ":"d","һ":"h","ɡ":"g","ο":"o","α":"a","ι":"i","κ":"k","ν":"v","ρ":"p","τ":"t","ɑ":"a","ӏ":"l","ꞓ":"c"},"platform_suffixes":["sites.google.com","github.io","gitlab.io","pages.dev","workers.dev","netlify.app","vercel.app","web.app","firebaseapp.com","herokuapp.com","onrender.com","weebly.com","wixsite.com","blogspot.com","wordpress.com","webflow.io","glitch.me","r2.dev","ipfs.io","dweb.link","amazonaws.com","azurewebsites.net","cloudfront.net"],"second_level":["ac","co","com","edu","go","gov","ne","net","or","org"],"no_typo_check":["stripe"],"min_substring_len":6,"min_subdomain_len":5,"min_typo_len":6}/*LOOKALIKE_DATA_END*/;
+const LK_STRONG = ['homoglyph', 'typosquat', 'brand-in-subdomain'];
+const LK_STRONG_POINTS = 25, LK_MODERATE_POINTS = 15;
+
+const LK = (() => {
+  const D = LOOKALIKE_DATA;
+  const legit = new Set(Object.values(D.brands).flat());
+  const nearby = new Set(D.known_legit_nearby), noTypo = new Set(D.no_typo_check), second = new Set(D.second_level);
+  const labelsMap = {};
+  Object.keys(D.brands).forEach(b => { labelsMap[b] = b; });
+  Object.keys(D.aliases).forEach(a => { labelsMap[a] = D.aliases[a]; });
+  const entries = Object.entries(labelsMap);
+
+  function punyDecode(input) {
+    const base = 36, tMin = 1, tMax = 26, skew = 38, damp = 700;
+    let n = 128, i = 0, bias = 72, out = [];
+    let b = input.lastIndexOf('-'); if (b < 0) b = 0;
+    for (let j = 0; j < b; j++) out.push(input.charCodeAt(j));
+    const adapt = (delta, num, first) => {
+      let k = 0; delta = first ? Math.floor(delta / damp) : delta >> 1; delta += Math.floor(delta / num);
+      for (; delta > ((base - tMin) * tMax) >> 1; k += base) delta = Math.floor(delta / (base - tMin));
+      return Math.floor(k + (base - tMin + 1) * delta / (delta + skew));
+    };
+    for (let idx = b > 0 ? b + 1 : 0; idx < input.length;) {
+      const oldi = i;
+      for (let w = 1, k = base; ; k += base) {
+        const c = input.charCodeAt(idx++);
+        const digit = c - 48 < 10 ? c - 22 : c - 65 < 26 ? c - 65 : c - 97 < 26 ? c - 97 : base;
+        if (digit >= base) throw new Error('bad punycode');
+        i += digit * w;
+        const t = k <= bias ? tMin : (k >= bias + tMax ? tMax : k - bias);
+        if (digit < t) break;
+        w *= base - t;
+      }
+      const len = out.length + 1;
+      bias = adapt(i - oldi, len, oldi === 0);
+      n += Math.floor(i / len); i %= len;
+      out.splice(i++, 0, n);
+    }
+    return String.fromCodePoint(...out);
+  }
+  const decodeHost = host => host.split('.').map(l => { if (l.startsWith('xn--')) { try { return punyDecode(l.slice(4)); } catch (e) { return l; } } return l; }).join('.');
+  const skeleton = t => Array.from(t).map(c => D.confusables[c] || c).join('');
+  const repl = (s, a, b) => s.split(a).join(b);
+
+  function variantsOf(label) {
+    const base = ['l', 'i'].map(one => repl(repl(repl(repl(label, '1', one), '0', 'o'), '3', 'e'), '5', 's'));
+    const out = new Set(base);
+    base.forEach(s => out.add(repl(repl(s, 'rn', 'm'), 'vv', 'w')));
+    out.delete(label);
+    return out;
+  }
+  function withinOneEdit(a, b) {
+    if (a === b || Math.abs(a.length - b.length) > 1) return false;
+    if (a.length === b.length) {
+      const diffs = []; for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) diffs.push(i);
+      if (diffs.length === 1) return true;
+      return diffs.length === 2 && diffs[1] === diffs[0] + 1 && a[diffs[0]] === b[diffs[1]] && a[diffs[1]] === b[diffs[0]];
+    }
+    const [s, l] = a.length < b.length ? [a, b] : [b, a];
+    let i = 0; while (i < s.length && s[i] === l[i]) i++;
+    return s.slice(i) === l.slice(i + 1);
+  }
+  function registrable(host) {
+    const labels = host.split('.');
+    if (labels.length < 2) return [host, []];
+    let keep = (labels.length >= 3 && labels[labels.length - 1].length === 2 && second.has(labels[labels.length - 2])) ? 3 : 2;
+    keep = Math.min(keep, labels.length);
+    return [labels.slice(-keep).join('.'), labels.slice(0, labels.length - keep)];
+  }
+  const platformSuffix = host => D.platform_suffixes.find(s => host === s || host.endsWith('.' + s)) || null;
+  const isLegit = host => { for (const d of legit) if (host === d || host.endsWith('.' + d)) return true; return false; };
+  const hit = (host, brand, kind, detail) => ({ host, brand, legit_domain: D.brands[brand][0], kind, strength: LK_STRONG.includes(kind) ? 'strong' : 'moderate', detail });
+
+  function labelFindings(host, label) {
+    const tokens = label.split('-').filter(Boolean);
+    const variants = variantsOf(label), tokVariants = tokens.map(t => [t, variantsOf(t)]);
+    for (const [name, owner] of entries) {
+      if (label.includes(name) && name.length >= D.min_substring_len) continue;
+      for (const v of variants) if ((v.includes(name) && name.length >= D.min_substring_len) || v === name)
+        return hit(host, owner, 'homoglyph', `"${label}" imitates "${name}" with look-alike characters`);
+      for (const [tok, vs] of tokVariants) if (vs.has(name))
+        return hit(host, owner, 'homoglyph', `"${tok}" imitates "${name}" with look-alike characters`);
+    }
+    for (const [name, owner] of entries) {
+      if (name.length < D.min_typo_len || noTypo.has(name)) continue;
+      for (const tok of tokens) if (tok.length >= D.min_typo_len && tok[0] === name[0] && withinOneEdit(tok, name))
+        return hit(host, owner, 'typosquat', `"${tok}" is one character away from "${name}"`);
+    }
+    for (const [name, owner] of entries) {
+      if (label === name) return hit(host, owner, 'unofficial-domain', `uses the "${name}" name but is not their domain`);
+      if (tokens.includes(name)) return hit(host, owner, 'brand-keyword', `combines "${name}" with other words`);
+      if (name.length >= D.min_substring_len && label.includes(name)) return hit(host, owner, 'brand-keyword', `contains "${name}" inside a different domain name`);
+    }
+    return null;
+  }
+
+  function checkHost(host) {
+    try {
+      host = (host || '').trim().toLowerCase().replace(/\.+$/, '');
+      if (!host || /^\d{1,3}(\.\d{1,3}){3}$/.test(host) || !host.includes('.')) return null;
+      const decoded = decodeHost(host);
+      if (isLegit(host)) return null;
+      const regAscii = registrable(host)[0];
+      if (nearby.has(regAscii) || legit.has(regAscii)) return null;
+      const [reg, subs] = registrable(decoded), plat = platformSuffix(host);
+      const skel = skeleton(decoded);
+      if (skel !== decoded) for (const [name, owner] of entries)
+        if (skel.split('-').join('').includes(name)) return hit(host, owner, 'homoglyph', `"${decoded}" uses look-alike non-Latin letters to imitate "${name}"`);
+      const subText = !plat ? subs : decoded.slice(0, decoded.length - plat.length).replace(/\.+$/, '').split('.');
+      for (const lab of subText) for (const [name, owner] of entries) {
+        const toks = lab.split('-');
+        const named = name.length >= D.min_substring_len ? lab.includes(name) : (name.length >= D.min_subdomain_len && (lab === name || toks.includes(name)));
+        if (named) return hit(host, owner, 'brand-in-subdomain', `"${name}" appears as part of someone else's domain (${plat ? plat : regAscii})`);
+      }
+      if (plat) return null;
+      const parts = reg.split('.');
+      const h = labelFindings(host, parts[0]);
+      if (h && h.kind === 'unofficial-domain' && parts[parts.length - 1].length === 2) return null;
+      return h;
+    } catch (e) { return null; }
+  }
+  return { checkHost };
+})();
+
+function lookalikeHostOf(s) {
+  s = (s || '').trim().replace(/^[a-z][a-z0-9+.-]*:\/\//i, '').split(/[\/?#]/)[0];
+  s = s.slice(s.lastIndexOf('@') + 1).replace(/:\d*$/, '');
+  return s.toLowerCase().replace(/\.+$/, '');
+}
+
+// Distinct look-alike hits over a list of hosts.
+function lookalikeAll(hosts) {
+  const seen = new Set(), out = [];
+  hosts.forEach(h => { h = (h || '').trim().toLowerCase().replace(/\.+$/, ''); if (seen.has(h)) return; seen.add(h); const r = LK.checkHost(h); if (r) out.push(r); });
+  return out;
+}
+function lookalikePoints(list) {
+  if (!list || !list.length) return 0;
+  return list.some(l => l.strength === 'strong') ? LK_STRONG_POINTS : LK_MODERATE_POINTS;
+}
+function lookalikeFlag(hit) { return 'Looks like ' + hit.brand + ' (' + hit.kind.replace(/-/g, ' ') + ')'; }
+function headerDomain(value) { const m = /@([^>\s;,"']+)\s*>?\s*$/.exec((value || '').trim()); return m ? m[1].toLowerCase() : ''; }
+
 // ── Live threat feed (compact snapshot published by a scheduled GitHub workflow) ──
 // The snapshot holds 5-byte SHA-256 fingerprints of listed hosts, not the list itself.
 // Matching rules mirror phishguard/threat_feed.py (rules come from feed-meta.json).
@@ -1121,11 +1266,14 @@ function scanURLs(text) {
     if (url.length > 100) flags.push('Unusually long URL');
     const feed = feedLookup(url);
     if (feed) flags.unshift(FEED_FLAG);
-    return { url, domain, flags, feed };
+    const lookalike = LK.checkHost(lookalikeHostOf(url));
+    const lkFlag = lookalike ? lookalikeFlag(lookalike) : null;
+    if (lkFlag) flags.push(lkFlag);
+    return { url, domain, flags, feed, lookalike, lkFlag };
   });
 }
 
-function calcScore(hf, ips, kw, urls) {
+function calcScore(hf, ips, kw, urls, lookalikes) {
   let s = 0;
   s += Math.min(hf.length * 15, 40);
   s += ips.filter(i=>i.isPrivate).length * 8;
@@ -1133,8 +1281,9 @@ function calcScore(hf, ips, kw, urls) {
   Object.entries(kw).forEach(([cat,words]) => {
     s += Math.min(words.length * (w[cat]||5), 25);
   });
-  urls.forEach(u => { s += (u.flags.length - (u.feed ? 1 : 0)) * 8; });
+  urls.forEach(u => { s += (u.flags.length - (u.feed ? 1 : 0) - (u.lkFlag ? 1 : 0)) * 8; });
   if (urls.some(u => u.feed)) s += FEED_SCORE;
+  s += lookalikePoints(lookalikes);
   // Bonus: if extortion category exists, guarantee HIGH
   if (kw.extortion && kw.extortion.length >= 2) s = Math.max(s, 75);
   return { score: Math.min(s, 100), level: s>=60?'HIGH':s>=30?'MEDIUM':'LOW' };
@@ -1172,7 +1321,8 @@ function renderOverview(r) {
     ...r.headerAnalysis.findings,
     ...r.ips.filter(ip=>ip.isPrivate).map(ip=>({text:`Private IP ${ip.ip} found in public routing headers`,severity:'high'})),
     ...Object.entries(r.keywords).map(([cat,words])=>({text:`${words.length} ${cat} keyword(s) detected: ${words.slice(0,4).join(', ')}${words.length>4?'…':''}`,severity:cat==='threat'||cat==='credential'?'high':'medium'})),
-    ...r.urls.filter(u=>u.flags.length).map(u=>({text:`Suspicious URL — ${u.domain}: ${u.flags[0]}`,severity:'high'})),
+    ...r.urls.filter(u=>u.flags.some(f=>f!==u.lkFlag)).map(u=>({text:`Suspicious URL — ${u.domain}: ${u.flags.find(f=>f!==u.lkFlag)}`,severity:'high'})),
+    ...(r.lookalikes||[]).map(l=>({text:`Look-alike domain — ${l.host} may impersonate ${l.brand} (${l.legit_domain}): ${l.detail}`,severity:l.strength==='strong'?'high':'medium'})),
   ];
   const dotCol = sev => sev==='high'?'#be123c':sev==='medium'?'#b45309':'#15803d';
   const findings = allFindings.length
@@ -1278,8 +1428,9 @@ function runAnalysis() {
     const ips            = extractIPs(parsed.receivedHeaders);
     const keywords       = detectKeywords(raw);
     const urls           = scanURLs(parsed.body || raw);
-    const risk           = calcScore(headerAnalysis.findings, ips, keywords, urls);
-    lastResult = { headers: parsed.headers, headerAnalysis, ips, keywords, urls, risk };
+    const lookalikes     = lookalikeAll([headerDomain(parsed.headers['from']), headerDomain(parsed.headers['reply-to'])].concat(urls.map(u => lookalikeHostOf(u.url))));
+    const risk           = calcScore(headerAnalysis.findings, ips, keywords, urls, lookalikes);
+    lastResult = { headers: parsed.headers, headerAnalysis, ips, keywords, urls, risk, lookalikes };
 
     const counts = [null, Object.keys(parsed.headers).length, ips.length, Object.values(keywords).flat().length, urls.length, null, null, null];
     document.querySelectorAll('.tab').forEach((t,i) => {
@@ -1755,7 +1906,10 @@ function analyzeSmsURLs(text) {
     if (url.length > 80) flags.push('Unusually long URL');
     const feed = feedLookup(url);
     if (feed) flags.unshift(FEED_FLAG);
-    return { url, domain, flags, feed };
+    const lookalike = LK.checkHost(lookalikeHostOf(url));
+    const lkFlag = lookalike ? lookalikeFlag(lookalike) : null;
+    if (lkFlag) flags.push(lkFlag);
+    return { url, domain, flags, feed, lookalike, lkFlag };
   });
 }
 
@@ -1763,8 +1917,9 @@ function calcSmsScore(keywords, urls, text) {
   let s = 0;
   const w = { urgency:8, financial:10, threat:12, impersonation:15, credential:10 };
   Object.entries(keywords).forEach(([cat, words]) => { s += Math.min(words.length * (w[cat]||5), 20); });
-  urls.forEach(u => { s += Math.min((u.flags.length - (u.feed ? 1 : 0)) * 12, 30); });
+  urls.forEach(u => { s += Math.min((u.flags.length - (u.feed ? 1 : 0) - (u.lkFlag ? 1 : 0)) * 12, 30); });
   if (urls.some(u => u.feed)) s += FEED_SCORE;
+  s += lookalikePoints(urls.map(u => u.lookalike).filter(Boolean));
   // Short message with a URL = very common smishing pattern
   const wordCount = text.trim().split(/\s+/).length;
   if (wordCount < 30 && urls.length > 0) s += 15;

@@ -22,6 +22,8 @@ FEED_MATCH_POINTS = 40  # externally-confirmed known-bad URL — strong signal
 AUTH_DMARC_FAIL_POINTS = 35  # the receiving mail server itself flagged this
 AUTH_SPF_FAIL_POINTS = 15
 AUTH_DKIM_FAIL_POINTS = 15
+LOOKALIKE_STRONG_POINTS = 25    # homoglyph / typo-squat / brand-in-subdomain
+LOOKALIKE_MODERATE_POINTS = 15  # brand name plus extra words, or on an unofficial domain
 NO_DMARC_RECORD_POINTS = 10  # weak signal alone — plenty of legit senders skip DMARC
 
 
@@ -33,6 +35,7 @@ def calculate_score(
     feed_matches=None,
     auth_results=None,
     dmarc_lookup=None,
+    lookalikes=None,
 ):
     """
     Scores the email from 0-100 based on all findings.
@@ -49,6 +52,7 @@ def calculate_score(
       Known-bad URL (feed)    : +40
       DMARC fail (per receiving server) : +35
       SPF or DKIM fail (and DMARC didn't already fail) : +15 each
+      Look-alike of a known brand (sender or link) : +25 strong / +15 moderate (once)
       No DMARC record published at all  : +10
     """
     score = 0
@@ -81,6 +85,14 @@ def calculate_score(
         reasons.append(
             f"{len(feed_matches)} URL(s) matched a live phishing threat feed (+{FEED_MATCH_POINTS})"
         )
+
+    if lookalikes:
+        strong = [l for l in lookalikes if l.get("strength") == "strong"]
+        pts = LOOKALIKE_STRONG_POINTS if strong else LOOKALIKE_MODERATE_POINTS
+        first = (strong or lookalikes)[0]
+        more = f" (+{len(lookalikes) - 1} more)" if len(lookalikes) > 1 else ""
+        score += pts
+        reasons.append(f"Look-alike domain: {first['host']} may impersonate {first['brand']} — {first['detail']}{more} (+{pts})")
 
     if auth_results:
         if auth_results.get("dmarc") == "fail":

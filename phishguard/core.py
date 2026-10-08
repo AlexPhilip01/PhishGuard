@@ -4,7 +4,7 @@ The full per-email pipeline — equivalent to the notebook's `analyze_single`
 """
 import os
 
-from . import dmarc, ip_utils, keywords, parser, scorer, threat_feed
+from . import dmarc, ip_utils, keywords, lookalike, parser, scorer, threat_feed
 
 
 def analyze_single(file_path: str, feed=None, check_dmarc: bool = True, feed_urls: list = None) -> dict:
@@ -47,6 +47,12 @@ def analyze_single(file_path: str, feed=None, check_dmarc: bool = True, feed_url
             feed_match_details = feed.match_all(body_urls)
             feed_matches = [m["url"] for m in feed_match_details]
 
+        # Look-alike (impersonation) check on the sender, reply-to and every link host.
+        # Needs no network, so it always runs.
+        link_hosts = [lookalike.host_of(u) for u in threat_feed.extract_urls(body)]
+        candidate_hosts = [dmarc.get_domain(headers["from"]), dmarc.get_domain(headers["reply_to"] or "")] + link_hosts
+        lookalikes = lookalike.check_hosts(candidate_hosts)
+
         auth_results = dmarc.parse_authentication_results(headers)
         dmarc_lookup = None
         if check_dmarc:
@@ -61,6 +67,7 @@ def analyze_single(file_path: str, feed=None, check_dmarc: bool = True, feed_url
             feed_matches=feed_matches,
             auth_results=auth_results,
             dmarc_lookup=dmarc_lookup,
+            lookalikes=lookalikes,
         )
         verdict = scorer.get_verdict(score)
 
@@ -78,6 +85,7 @@ def analyze_single(file_path: str, feed=None, check_dmarc: bool = True, feed_url
             "feed_match_details": feed_match_details,
             "auth_results": auth_results,
             "dmarc_lookup": dmarc_lookup,
+            "lookalikes": lookalikes,
             "error": None,
         }
 

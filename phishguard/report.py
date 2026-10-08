@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 def print_report(headers, ip_analysis, keyword_findings, score, reasons, verdict, feed_matches=None,
-                  auth_results=None, dmarc_lookup=None, feed_details=None):
+                  auth_results=None, dmarc_lookup=None, feed_details=None, lookalikes=None):
     print("\n" + "=" * 55)
     print("       PHISHING EMAIL ANALYSIS REPORT")
     print("=" * 55)
@@ -54,6 +54,15 @@ def print_report(headers, ip_analysis, keyword_findings, score, reasons, verdict
                     print(f"  ⚠️  {url}  —  matches a known-active phishing URL")
         else:
             print("  No URLs matched the live feeds")
+
+    if lookalikes is not None:
+        print("\n🎭 LOOK-ALIKE DOMAIN CHECK")
+        if lookalikes:
+            for l in lookalikes:
+                tag = "⚠️ " if l["strength"] == "strong" else "• "
+                print(f"  {tag} {l['host']}  —  may impersonate {l['brand']} ({l['legit_domain']}): {l['detail']}")
+        else:
+            print("  No sender or link domain imitates a well-known brand")
 
     if auth_results or dmarc_lookup is not None:
         print("\n🔐 EMAIL AUTHENTICATION (SPF / DKIM / DMARC)")
@@ -153,6 +162,16 @@ def _build_html_report(results) -> str:
                 + "</ul>"
             )
 
+        lookalike_html = ""
+        if r.get("lookalikes"):
+            lookalike_html = (
+                "<div class='section-title'>🎭 Look-alike Domains</div>"
+                "<ul style='margin:4px 0; padding-left:18px;'>"
+                + "".join(f"<li>{l['host']} — may impersonate {l['brand']} ({l['legit_domain']}): {l['detail']}</li>"
+                          for l in r["lookalikes"])
+                + "</ul>"
+            )
+
         html_rows += f"""
         <div class="email-card" style="background:{row_bg};">
             <div class="card-header">
@@ -199,6 +218,7 @@ def _build_html_report(results) -> str:
                 </tr>
             </table>
             {feed_html}
+            {lookalike_html}
             <div class="section-title">📊 Risk Score Breakdown</div>
             {breakdown_html}
         </div>

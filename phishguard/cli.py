@@ -80,6 +80,7 @@ def cmd_analyze(args):
         result["score"], result["reasons"], result["verdict"],
         feed_matches=result["feed_matches"], feed_details=result["feed_match_details"],
         auth_results=result["auth_results"], dmarc_lookup=result["dmarc_lookup"],
+        lookalikes=result["lookalikes"],
     )
     database.save_analysis(result)
 
@@ -118,6 +119,7 @@ def cmd_batch(args):
             result["score"], result["reasons"], result["verdict"],
             feed_matches=result["feed_matches"], feed_details=result["feed_match_details"],
             auth_results=result["auth_results"], dmarc_lookup=result["dmarc_lookup"],
+        lookalikes=result["lookalikes"],
         )
         database.save_analysis(result)
 
