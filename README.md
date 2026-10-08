@@ -20,7 +20,7 @@ Features
 - **Batch Mode** — analyze multiple .eml files at once with a summary table
 - **PDF Export** — generates a styled, real PDF investigation report (no manual "print to PDF" step)
 - **Persistent History** — every analysis is logged locally (SQLite), so the tool builds its own record of senders/domains seen before, with `phishguard history` and `phishguard stats`
-- **Live Threat Feed Check** — optionally checks URLs in the email body against OpenPhish's free, continuously-updated feed of active phishing URLs
+- **Live Threat Feeds** — checks URLs in the email body against continuously-updated public phishing feeds: [Phishing.Database](https://github.com/Phishing-Database/Phishing.Database) (~390k active phishing domains) and the OpenPhish community feed. Feeds are cached locally and refreshed automatically when stale, so every run uses current data. Matching is deliberately conservative: shared platforms (Google Sites, GitHub Pages, IPFS gateways, S3 endpoints…) are never flagged wholesale — only specifically-listed hosts or URLs are.
 - **DMARC / SPF / DKIM Check** — reads any `Authentication-Results` header the receiving mail server already added, and independently looks up the sender domain's live DMARC policy via DNS. Also works standalone for any domain: `phishguard check-domain <domain>`
 
 ---
@@ -54,6 +54,8 @@ phishguard analyze suspicious.eml                    # analyze one email
 phishguard analyze suspicious.eml --pdf report.pdf   # ...and export a PDF
 phishguard batch ./emails --pdf batch_report.pdf     # analyze a whole folder
 phishguard batch ./emails --no-feed                  # skip the live threat-feed check
+phishguard analyze suspicious.eml --feeds phishing-database   # use only one feed
+phishguard update-feeds                              # refresh the live feeds right now
 
 phishguard history          # see everything analyzed so far
 phishguard stats            # all-time aggregate stats
@@ -61,7 +63,7 @@ phishguard stats            # all-time aggregate stats
 phishguard check-domain paypal.com    # check any domain's DMARC policy, standalone
 ```
 
-Every analysis — CLI or batch — is automatically recorded to a local SQLite database (`~/.phishguard/phishguard.db`), so `history` and `stats` build up over time without any extra setup. Add `--no-feed` and/or `--no-dmarc` to `analyze`/`batch` to skip the network-dependent checks.
+Every analysis — CLI or batch — is automatically recorded to a local SQLite database (`~/.phishguard/phishguard.db`), so `history` and `stats` build up over time without any extra setup. Add `--no-feed` and/or `--no-dmarc` to `analyze`/`batch` to skip the network-dependent checks. Threat feeds are cached in `~/.phishguard/feeds/` and re-downloaded automatically once they are older than 6 hours (Phishing.Database) or 12 hours (OpenPhish); use `--refresh-feeds` to force it. If a feed can't be reached, the last cached copy is used, and if there is none that feed is skipped — an analysis never fails because a feed is down.
 
 How to Run — Google Colab (original notebook)
 
@@ -81,15 +83,16 @@ Package Structure (CLI version)
 | `phishguard/ip_utils.py` | IP extraction + validation from Received headers |
 | `phishguard/keywords.py` | Categorized phishing keyword detection |
 | `phishguard/scorer.py` | Weighted risk scoring + verdict |
-| `phishguard/threat_feed.py` | Optional live OpenPhish feed check for body URLs |
+| `phishguard/threat_feed.py` | Live multi-feed check (Phishing.Database + OpenPhish): cached downloads, ETag refresh, conservative matching |
 | `phishguard/dmarc.py` | Authentication-Results parsing + live DMARC DNS lookup |
 | `phishguard/database.py` | Persistent local history (SQLite) |
 | `phishguard/report.py` | Terminal report, summary table, PDF export |
 | `phishguard/core.py` | Wires the above into one per-email pipeline |
 | `phishguard/cli.py` | Command-line entry point (`analyze`, `batch`, `history`, `stats`) |
 | `tests/test_core.py` | Unit tests for the detection logic |
+| `tests/test_feeds.py` | Tests for feed matching, shared-platform protection, caching and offline behaviour (no network needed) |
 
-> The live threat-feed check uses OpenPhish's free community feed, which is intended for personal/research use — check [their terms](https://openphish.com/phishing_feeds.html) before relying on it in a commercial product.
+> **Feed licensing:** the OpenPhish community feed is for non-commercial use only ([terms](https://openphish.com/terms.html)) — if you build PhishGuard into a commercial product, use `--feeds phishing-database` or buy an OpenPhish commercial licence. Phishing.Database is community-maintained; check its repository's LICENSE before commercial use.
 
 Notebook Structure (original, still included)
 

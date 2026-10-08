@@ -207,7 +207,8 @@ def test_scorer_dmarc_fail_reported_by_receiving_server():
 
 def test_scorer_no_dmarc_record_is_a_small_signal():
     score, reasons = scorer.calculate_score(
-        [], {}, False, [], dmarc_lookup={"found": False, "policy": None, "raw": None, "tags": {}, "error": None}
+        [], {}, False, [],
+        dmarc_lookup={"found": False, "policy": None, "raw": None, "tags": {}, "error": None, "domain_exists": True},
     )
     assert score == 10
     assert any("no DMARC record" in r for r in reasons)

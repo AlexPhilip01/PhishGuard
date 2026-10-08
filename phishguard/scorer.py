@@ -96,9 +96,12 @@ def calculate_score(
                 score += AUTH_DKIM_FAIL_POINTS
                 reasons.append(f"Receiving mail server reported DKIM fail (+{AUTH_DKIM_FAIL_POINTS})")
 
-    if dmarc_lookup and not dmarc_lookup.get("found") and dmarc_lookup.get("error") is None:
+    if (dmarc_lookup and not dmarc_lookup.get("found") and dmarc_lookup.get("error") is None
+            and dmarc_lookup.get("domain_exists") is True):
         # error is None means the lookup was definitive (not a timeout/network
-        # issue) — the domain genuinely has no DMARC record.
+        # issue). Only scored when the domain itself is confirmed to exist: if it
+        # doesn't resolve (gone, or this network's DNS is hijacked/broken) or we
+        # couldn't tell, "no DMARC record" is not a trustworthy signal.
         score += NO_DMARC_RECORD_POINTS
         reasons.append(f"Sender domain publishes no DMARC record (+{NO_DMARC_RECORD_POINTS})")
 

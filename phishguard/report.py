@@ -15,7 +15,7 @@ from pathlib import Path
 
 
 def print_report(headers, ip_analysis, keyword_findings, score, reasons, verdict, feed_matches=None,
-                  auth_results=None, dmarc_lookup=None):
+                  auth_results=None, dmarc_lookup=None, feed_details=None):
     print("\n" + "=" * 55)
     print("       PHISHING EMAIL ANALYSIS REPORT")
     print("=" * 55)
@@ -44,10 +44,16 @@ def print_report(headers, ip_analysis, keyword_findings, score, reasons, verdict
     if feed_matches is not None:
         print("\n🛰️  THREAT FEED CHECK")
         if feed_matches:
+            how = {"url": "exact URL listed", "host": "host listed", "parent-domain": "parent domain listed"}
+            details = {d["url"]: d for d in (feed_details or [])}
             for url in feed_matches:
-                print(f"  ⚠️  {url}  —  matches a known-active phishing URL")
+                d = details.get(url)
+                if d:
+                    print(f"  ⚠️  {url}  —  {how.get(d['kind'], d['kind'])} by {d['source']} ({d['matched']})")
+                else:
+                    print(f"  ⚠️  {url}  —  matches a known-active phishing URL")
         else:
-            print("  No URLs matched the live feed")
+            print("  No URLs matched the live feeds")
 
     if auth_results or dmarc_lookup is not None:
         print("\n🔐 EMAIL AUTHENTICATION (SPF / DKIM / DMARC)")
@@ -60,10 +66,13 @@ def print_report(headers, ip_analysis, keyword_findings, score, reasons, verdict
         if dmarc_lookup is not None:
             if dmarc_lookup["found"]:
                 print(f"  Sender domain DMARC policy: p={dmarc_lookup['policy']}")
-            elif dmarc_lookup["error"] is None:
+            elif dmarc_lookup["error"] is None and dmarc_lookup.get("domain_exists") is False:
+                print("  Sender domain does not resolve in DNS (NXDOMAIN) — DMARC not scored. "
+                      "(If this looks wrong, your network's DNS may be blocking lookups.)")
+            elif dmarc_lookup["error"] is None and dmarc_lookup.get("domain_exists") is True:
                 print("  Sender domain publishes no DMARC record")
             else:
-                print(f"  DMARC lookup inconclusive ({dmarc_lookup['error']})")
+                print(f"  DMARC lookup inconclusive ({dmarc_lookup['error'] or 'could not confirm the domain exists'})")
 
     print("\n📊 RISK SCORE BREAKDOWN")
     if reasons:

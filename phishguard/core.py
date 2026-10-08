@@ -7,18 +7,26 @@ import os
 from . import dmarc, ip_utils, keywords, parser, scorer, threat_feed
 
 
-def analyze_single(file_path: str, feed_urls: list = None, check_dmarc: bool = True) -> dict:
+def analyze_single(file_path: str, feed=None, check_dmarc: bool = True, feed_urls: list = None) -> dict:
     """
     Runs the full analysis pipeline on one .eml file.
 
-    `feed_urls`: pass a list of known-bad URLs (e.g. from
-    threat_feed.fetch_openphish_feed()) to also score body URLs against a
-    live feed. Pass None to skip the feed check entirely (fully offline).
+    `feed`: a threat_feed.FeedIndex (from threat_feed.build_index()) to also
+    check body URLs against live phishing feeds. Pass None to skip the feed
+    check entirely (fully offline). A plain list of known-bad URLs is also
+    accepted. (`feed_urls` is the older name for that list and still works.)
 
     `check_dmarc`: whether to run a live DNS lookup of the sender domain's
     DMARC record. Parsing any Authentication-Results header already in the
     email happens either way — that part needs no network.
     """
+    if feed is None and feed_urls is not None:
+        feed = feed_urls
+    if isinstance(feed, (list, tuple, set)):
+        index = threat_feed.FeedIndex()
+        index.add_urls("list", feed)
+        feed = index
+
     try:
         msg = parser.load_email(file_path)
         headers = parser.extract_headers(msg)
@@ -33,9 +41,11 @@ def analyze_single(file_path: str, feed_urls: list = None, check_dmarc: bool = T
         keyword_findings = keywords.scan_subject_and_body(headers["subject"], body)
 
         feed_matches = None
-        if feed_urls is not None:
+        feed_match_details = None
+        if feed is not None:
             body_urls = threat_feed.extract_urls(body)
-            feed_matches = threat_feed.check_urls_against_feed(body_urls, feed_urls)
+            feed_match_details = feed.match_all(body_urls)
+            feed_matches = [m["url"] for m in feed_match_details]
 
         auth_results = dmarc.parse_authentication_results(headers)
         dmarc_lookup = None
@@ -65,6 +75,7 @@ def analyze_single(file_path: str, feed_urls: list = None, check_dmarc: bool = T
             "keyword_findings": keyword_findings,
             "reasons": reasons,
             "feed_matches": feed_matches,
+            "feed_match_details": feed_match_details,
             "auth_results": auth_results,
             "dmarc_lookup": dmarc_lookup,
             "error": None,

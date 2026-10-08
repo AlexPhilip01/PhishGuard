@@ -12,6 +12,8 @@ Examples:
     phishguard analyze suspicious.eml --pdf report.pdf
     phishguard batch ./emails --pdf batch_report.pdf
     phishguard batch ./emails --no-feed        # skip the live threat-feed check
+    phishguard analyze suspicious.eml --feeds phishing-database   # use one feed only
+    phishguard update-feeds                    # refresh the live threat feeds now
     phishguard history --limit 20
     phishguard stats
 """
@@ -24,23 +26,48 @@ from . import database, dmarc, report, threat_feed
 from .core import analyze_single
 
 
-def _get_feed_urls(use_feed: bool):
-    if not use_feed:
+def _parse_feed_names(raw):
+    if not raw:
+        return None  # all feeds
+    names = [n.strip() for n in raw.split(",") if n.strip()]
+    unknown = [n for n in names if n not in threat_feed.FEED_SOURCES]
+    if unknown:
+        print(f"❌ Unknown feed(s): {', '.join(unknown)}. "
+              f"Choose from: {', '.join(threat_feed.FEED_SOURCES)}", file=sys.stderr)
+        sys.exit(2)
+    return names
+
+
+def _print_feed_status(statuses):
+    notes = {
+        "fresh": "downloaded just now",
+        "cached": "up to date",
+        "stale": "could not refresh — using an older cached copy",
+        "offline": "unreachable and no cache — skipped",
+    }
+    for name, st in statuses.items():
+        icon = "✅" if st["status"] in ("fresh", "cached") else "⚠️ "
+        extra = f", {st['dropped']} shared-platform entries ignored" if st.get("dropped") else ""
+        print(f"  {icon} {name}: {st['count']:,} entries ({notes[st['status']]}{extra})", file=sys.stderr)
+
+
+def _get_feed(args):
+    """Builds the live feed index, or returns None if feeds are disabled or all unreachable."""
+    if args.no_feed:
         return None
-    urls, status = threat_feed.fetch_openphish_feed()
-    if status == "offline":
-        print("⚠️  Could not reach the OpenPhish feed and no local cache exists — "
-              "continuing without the live feed check.", file=sys.stderr)
+    names = _parse_feed_names(args.feeds)
+    print("🛰️  Threat feeds:", file=sys.stderr)
+    index, statuses = threat_feed.build_index(names, force=args.refresh_feeds)
+    _print_feed_status(statuses)
+    if all(st["status"] == "offline" for st in statuses.values()):
+        print("⚠️  No feed available — continuing without the live feed check.", file=sys.stderr)
         return None
-    if status == "stale":
-        print("⚠️  Could not refresh the OpenPhish feed — using a cached (possibly "
-              "outdated) copy.", file=sys.stderr)
-    return urls
+    return index
 
 
 def cmd_analyze(args):
-    feed_urls = _get_feed_urls(not args.no_feed)
-    result = analyze_single(args.file, feed_urls=feed_urls, check_dmarc=not args.no_dmarc)
+    feed = _get_feed(args)
+    result = analyze_single(args.file, feed=feed, check_dmarc=not args.no_dmarc)
 
     if result["error"]:
         print(f"❌ Error reading file: {result['error']}")
@@ -49,7 +76,7 @@ def cmd_analyze(args):
     report.print_report(
         result["headers"], result["ip_analysis"], result["keyword_findings"],
         result["score"], result["reasons"], result["verdict"],
-        feed_matches=result["feed_matches"],
+        feed_matches=result["feed_matches"], feed_details=result["feed_match_details"],
         auth_results=result["auth_results"], dmarc_lookup=result["dmarc_lookup"],
     )
     database.save_analysis(result)
@@ -68,7 +95,7 @@ def cmd_batch(args):
         print(f"⚠️  No .eml files found in {args.folder}")
         return
 
-    feed_urls = _get_feed_urls(not args.no_feed)
+    feed = _get_feed(args)
     print(f"🔍 Found {len(eml_files)} email(s) — analyzing...\n")
 
     all_results = []
@@ -77,7 +104,7 @@ def cmd_batch(args):
         print(f"  Analyzing: {os.path.basename(file_path)}")
         print("─" * 55)
 
-        result = analyze_single(file_path, feed_urls=feed_urls, check_dmarc=not args.no_dmarc)
+        result = analyze_single(file_path, feed=feed, check_dmarc=not args.no_dmarc)
         all_results.append(result)
 
         if result["error"]:
@@ -87,7 +114,7 @@ def cmd_batch(args):
         report.print_report(
             result["headers"], result["ip_analysis"], result["keyword_findings"],
             result["score"], result["reasons"], result["verdict"],
-            feed_matches=result["feed_matches"],
+            feed_matches=result["feed_matches"], feed_details=result["feed_match_details"],
             auth_results=result["auth_results"], dmarc_lookup=result["dmarc_lookup"],
         )
         database.save_analysis(result)
@@ -101,6 +128,20 @@ def cmd_batch(args):
             print(f"📥 PDF report saved to {path}")
         else:
             print(f"📥 Report saved to {path} (install xhtml2pdf for a real .pdf)")
+
+
+def cmd_update_feeds(args):
+    """Force-refresh the local copy of every (or the chosen) threat feed."""
+    names = _parse_feed_names(args.feeds)
+    print("🛰️  Refreshing threat feeds...")
+    index, statuses = threat_feed.build_index(names, force=True)
+    for name, st in statuses.items():
+        print(f"  {name:18} {st['status']:8} {st['count']:>9,} entries   ({st['label']})")
+        if st.get("dropped"):
+            print(f"  {'':18} {'':8} {st['dropped']:>9,} shared-platform/hub entries ignored to avoid false positives")
+    print(f"\nCached in {threat_feed.DEFAULT_CACHE_DIR}")
+    if any(st["status"] in ("stale", "offline") for st in statuses.values()):
+        sys.exit(1)
 
 
 def cmd_check_domain(args):
@@ -126,7 +167,10 @@ def cmd_check_domain(args):
         note = policy_notes.get(result["policy"])
         if note:
             print(f"\n  {note}")
-    elif result["error"] is None:
+    elif result["error"] is None and result.get("domain_exists") is False:
+        print("  ❓ This domain does not resolve in DNS (NXDOMAIN).")
+        print("     Either it doesn't exist, or your network's DNS is blocking/hijacking lookups.")
+    elif result["error"] is None and result.get("domain_exists") is True:
         print("  ⚠️  No DMARC record published for this domain.")
         print("     Mail claiming to be from this domain has no DMARC-based protection against spoofing.")
     else:
@@ -168,6 +212,9 @@ def main():
     p_analyze.add_argument("file", help="Path to the .eml file")
     p_analyze.add_argument("--pdf", help="Also write a PDF report to this path")
     p_analyze.add_argument("--no-feed", action="store_true", help="Skip the live threat-feed check")
+    p_analyze.add_argument("--feeds", help="Comma-separated feeds to use (default: all). "
+                           f"Choices: {', '.join(threat_feed.FEED_SOURCES)}")
+    p_analyze.add_argument("--refresh-feeds", action="store_true", help="Force a fresh download of the feeds")
     p_analyze.add_argument("--no-dmarc", action="store_true", help="Skip the live DMARC DNS lookup")
     p_analyze.set_defaults(func=cmd_analyze)
 
@@ -175,8 +222,15 @@ def main():
     p_batch.add_argument("folder", help="Folder containing .eml files")
     p_batch.add_argument("--pdf", help="Also write a combined PDF report to this path")
     p_batch.add_argument("--no-feed", action="store_true", help="Skip the live threat-feed check")
+    p_batch.add_argument("--feeds", help="Comma-separated feeds to use (default: all). "
+                           f"Choices: {', '.join(threat_feed.FEED_SOURCES)}")
+    p_batch.add_argument("--refresh-feeds", action="store_true", help="Force a fresh download of the feeds")
     p_batch.add_argument("--no-dmarc", action="store_true", help="Skip the live DMARC DNS lookup")
     p_batch.set_defaults(func=cmd_batch)
+
+    p_update = sub.add_parser("update-feeds", help="Download the latest copy of the live threat feeds")
+    p_update.add_argument("--feeds", help="Comma-separated feeds to refresh (default: all)")
+    p_update.set_defaults(func=cmd_update_feeds)
 
     p_domain = sub.add_parser("check-domain", help="Check the DMARC record for any domain, standalone")
     p_domain.add_argument("domain", help="Domain to check, e.g. example.com")

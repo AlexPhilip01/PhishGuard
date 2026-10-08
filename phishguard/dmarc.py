@@ -70,6 +70,26 @@ def _parse_dmarc_tags(record: str) -> dict:
     return tags
 
 
+def _domain_exists(domain: str, timeout: float = 5.0):
+    """
+    True if `domain` resolves at all, False if DNS says it does not exist (NXDOMAIN),
+    None if we couldn't tell (timeout, resolver trouble). Never raises.
+    """
+    try:
+        import dns.resolver
+    except ImportError:
+        return None
+    try:
+        dns.resolver.resolve(domain, "NS", lifetime=timeout)
+        return True
+    except dns.resolver.NoAnswer:
+        return True  # the name exists; it just has no NS records at exactly this label
+    except dns.resolver.NXDOMAIN:
+        return False
+    except Exception:
+        return None
+
+
 def lookup_dmarc(domain: str, timeout: float = 5.0) -> dict:
     """
     Looks up _dmarc.<domain>. Returns:
@@ -80,9 +100,14 @@ def lookup_dmarc(domain: str, timeout: float = 5.0) -> dict:
       error  - None on a definitive answer (found or genuinely absent);
                a description string if the lookup was inconclusive
                (timeout, no network, resolver missing)
+      domain_exists - True/False/None: whether the domain itself resolves in DNS.
+               A missing DMARC record only means something if the domain exists —
+               if the domain itself is NXDOMAIN (it's gone, or the network's DNS is
+               hijacked/broken and answers NXDOMAIN for everything), "no DMARC
+               record" would be a false signal, so callers must not score it.
     Never raises.
     """
-    empty = {"found": False, "policy": None, "raw": None, "tags": {}}
+    empty = {"found": False, "policy": None, "raw": None, "tags": {}, "domain_exists": None}
     if not domain:
         return {**empty, "error": "no domain given"}
 
@@ -94,7 +119,8 @@ def lookup_dmarc(domain: str, timeout: float = 5.0) -> dict:
     try:
         answers = dns.resolver.resolve(f"_dmarc.{domain}", "TXT", lifetime=timeout)
     except (dns.resolver.NXDOMAIN, dns.resolver.NoAnswer):
-        return {**empty, "error": None}  # definitive: no DMARC record published
+        # No record at _dmarc.<domain>. Only meaningful if the domain itself exists.
+        return {**empty, "error": None, "domain_exists": _domain_exists(domain, timeout)}
     except Exception as e:
         return {**empty, "error": f"{type(e).__name__}: {e}"}  # inconclusive
 
@@ -102,6 +128,7 @@ def lookup_dmarc(domain: str, timeout: float = 5.0) -> dict:
         txt = _txt_to_str(rdata)
         if txt.lower().startswith("v=dmarc1"):
             tags = _parse_dmarc_tags(txt)
-            return {"found": True, "policy": tags.get("p"), "raw": txt, "tags": tags, "error": None}
+            return {"found": True, "policy": tags.get("p"), "raw": txt, "tags": tags,
+                    "error": None, "domain_exists": True}
 
-    return {**empty, "error": None}  # record type exists but wasn't a DMARC record
+    return {**empty, "error": None, "domain_exists": True}  # TXT exists but isn't a DMARC record
