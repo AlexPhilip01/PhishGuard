@@ -2,42 +2,43 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#0f1012">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PhishGuard — Email Threat Analyzer</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 60'><rect width='60' height='60' rx='10' fill='%236d28d9'/><path d='M30 52s20-10 20-25V14L30 7 10 14v13c0 15 20 25 20 25z' fill='white'/></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<title>PhishGuard — Email &amp; SMS Threat Analyzer · Shield InfoSec</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 :root{
-  --bg:#f5f3ff;
-  --white:#ffffff;
-  --surface:#faf9ff;
-  --border:#e4e0f5;
-  --border2:#cdc7ef;
-  --text:#1e1b3a;
-  --muted:#6e6a8f;
-  --muted2:#a09cc4;
-  --primary:#6d28d9;
-  --primary-light:#ede9fe;
-  --primary-border:#c4b5fd;
-  --danger:#be123c;
-  --danger-light:#fff1f2;
-  --danger-border:#fecdd3;
-  --warn:#b45309;
-  --warn-light:#fffbeb;
-  --warn-border:#fde68a;
-  --success:#15803d;
-  --success-light:#f0fdf4;
-  --success-border:#bbf7d0;
-  --radius:10px;
-  --shadow:0 1px 3px rgba(109,40,217,.07),0 1px 2px rgba(109,40,217,.05);
-  --shadow-md:0 4px 12px rgba(109,40,217,.10);
-  --shadow-lg:0 8px 24px rgba(109,40,217,.14);
+  --bg:#0f1012;
+  --white:#16181b;
+  --surface:#1d2024;
+  --border:#2a2d32;
+  --border2:#3b3f46;
+  --text:#f2efe8;
+  --muted:#c2bdb2;
+  --muted2:#8f8a80;
+  --primary:#d6a84e;
+  --primary-light:rgba(214,168,78,.12);
+  --primary-border:rgba(214,168,78,.40);
+  --danger:#e5534b;
+  --danger-light:rgba(229,83,75,.12);
+  --danger-border:rgba(229,83,75,.40);
+  --warn:#ec8b3f;
+  --warn-light:rgba(236,139,63,.12);
+  --warn-border:rgba(236,139,63,.40);
+  --success:#5cc795;
+  --success-light:rgba(92,199,149,.12);
+  --success-border:rgba(92,199,149,.40);
+  --radius:12px;
+  --shadow:none;
+  --shadow-md:0 4px 12px rgba(0,0,0,.35);
+  --shadow-lg:0 8px 24px rgba(0,0,0,.45);
 }
 
 html,body{height:100%;overflow:hidden}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;display:flex;flex-direction:column}
+body{font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;display:flex;flex-direction:column}
 
 /* ── Topbar ── */
 .topbar{
@@ -45,14 +46,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-
   padding:0 32px;height:64px;flex-shrink:0;
   display:flex;align-items:center;gap:16px;
   position:sticky;top:0;z-index:200;
-  box-shadow:0 1px 0 var(--border),0 2px 8px rgba(109,40,217,.06);
+  background:rgba(15,16,18,.92);backdrop-filter:blur(14px);
 }
 .brand{display:flex;align-items:center;gap:12px}
 .brand-icon{
   width:38px;height:38px;
-  background:linear-gradient(135deg,#6d28d9,#4f46e5);
+  background:none;
   border-radius:9px;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 2px 10px rgba(109,40,217,.4);flex-shrink:0;
+  flex-shrink:0;overflow:hidden;
 }
 .brand-icon svg{width:20px;height:20px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .brand-name{font-size:22px;font-weight:800;letter-spacing:-.6px;color:var(--text)}
@@ -105,7 +106,7 @@ textarea.eml-input{
   color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:10.5px;
   padding:10px 12px;resize:vertical;outline:none;transition:border-color .2s;line-height:1.6;
 }
-textarea.eml-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(109,40,217,.1)}
+textarea.eml-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(214,168,78,.18)}
 textarea.eml-input::placeholder{color:var(--muted2)}
 
 input.text-input{
@@ -114,25 +115,24 @@ input.text-input{
   color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;
   padding:11px 12px;outline:none;transition:border-color .2s;
 }
-input.text-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(109,40,217,.1)}
+input.text-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(214,168,78,.18)}
 input.text-input::placeholder{color:var(--muted2)}
 
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:7px;
   padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;
-  border:none;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif;
+  border:none;cursor:pointer;transition:all .15s;font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
 }
 .btn-primary{
-  background:linear-gradient(135deg,#6d28d9,#5b21b6);color:#fff;width:100%;
-  box-shadow:0 2px 8px rgba(109,40,217,.35);
+  background:var(--primary);color:#16130a;width:100%;
 }
-.btn-primary:hover{background:linear-gradient(135deg,#5b21b6,#4c1d95);box-shadow:0 4px 14px rgba(109,40,217,.45)}
+.btn-primary:hover{background:#e4bc6a}
 .btn-primary:active{transform:scale(.98)}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border);font-size:12px;padding:7px 14px}
 .btn-ghost:hover{background:var(--primary-light);color:var(--primary);border-color:var(--primary-border)}
 .btn-sample{background:var(--primary-light);color:var(--primary);border:1px solid var(--primary-border);font-size:12px;width:100%}
-.btn-sample:hover{background:#ddd6fe}
+.btn-sample:hover{background:rgba(214,168,78,.2)}
 .btn-sm{padding:6px 14px;font-size:12px}
 
 .info-box{
@@ -201,11 +201,11 @@ input.text-input::placeholder{color:var(--muted2)}
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
 .card-header-icon svg{width:15px;height:15px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.icon-purple{background:#ede9fe}.icon-purple svg{stroke:#6d28d9}
-.icon-red{background:#fff1f2}.icon-red svg{stroke:#be123c}
-.icon-yellow{background:#fffbeb}.icon-yellow svg{stroke:#b45309}
-.icon-green{background:#f0fdf4}.icon-green svg{stroke:#15803d}
-.icon-indigo{background:#eef2ff}.icon-indigo svg{stroke:#4338ca}
+.icon-purple{background:rgba(214,168,78,.14)}.icon-purple svg{stroke:#d6a84e}
+.icon-red{background:rgba(229,83,75,.14)}.icon-red svg{stroke:#e5534b}
+.icon-yellow{background:rgba(236,139,63,.14)}.icon-yellow svg{stroke:#ec8b3f}
+.icon-green{background:rgba(92,199,149,.14)}.icon-green svg{stroke:#5cc795}
+.icon-indigo{background:rgba(143,169,196,.14)}.icon-indigo svg{stroke:#8fa9c4}
 .card-header h3{font-size:13px;font-weight:600;color:var(--text)}
 .card-header .count{
   margin-left:auto;font-size:11px;color:var(--muted);
@@ -217,7 +217,7 @@ input.text-input::placeholder{color:var(--muted2)}
 
 /* Score hero */
 .score-hero{
-  background:linear-gradient(135deg,#3b0764 0%,#4c1d95 40%,#312e81 100%);
+  background:linear-gradient(135deg,#1d2024 0%,#22201a 100%);border:1px solid rgba(214,168,78,.35);
   border-radius:var(--radius);padding:28px;margin-bottom:16px;
   display:flex;align-items:center;gap:28px;flex-wrap:wrap;
   box-shadow:var(--shadow-lg);position:relative;overflow:hidden;width:100%;
@@ -234,9 +234,9 @@ input.text-input::placeholder{color:var(--muted2)}
   padding:6px 20px;border-radius:20px;font-size:12px;font-weight:700;
   letter-spacing:.7px;text-transform:uppercase;margin-left:auto;z-index:1;
 }
-.risk-HIGH{background:rgba(190,18,60,.25);color:#fda4af;border:1px solid rgba(190,18,60,.4)}
-.risk-MEDIUM{background:rgba(180,83,9,.25);color:#fcd34d;border:1px solid rgba(180,83,9,.4)}
-.risk-LOW{background:rgba(21,128,61,.25);color:#86efac;border:1px solid rgba(21,128,61,.4)}
+.risk-HIGH{background:rgba(229,83,75,.18);color:#f4a39d;border:1px solid rgba(229,83,75,.5)}
+.risk-MEDIUM{background:rgba(236,139,63,.18);color:#f5c08f;border:1px solid rgba(236,139,63,.5)}
+.risk-LOW{background:rgba(92,199,149,.18);color:#9be0bd;border:1px solid rgba(92,199,149,.5)}
 
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
@@ -272,10 +272,10 @@ input.text-input::placeholder{color:var(--muted2)}
 
 .chip-wrap{display:flex;flex-wrap:wrap;gap:6px}
 .chip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;font-family:'IBM Plex Mono',monospace}
-.chip-urgency{background:#fef2f2;color:#9f1239;border:1px solid #fecdd3}
-.chip-financial{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
-.chip-threat{background:#fdf4ff;color:#7e22ce;border:1px solid #e9d5ff}
-.chip-credential{background:#eef2ff;color:#3730a3;border:1px solid #c7d2fe}
+.chip-urgency{background:rgba(229,83,75,.12);color:#f4a39d;border:1px solid rgba(229,83,75,.4)}
+.chip-financial{background:rgba(236,139,63,.12);color:#f5c08f;border:1px solid rgba(236,139,63,.4)}
+.chip-threat{background:rgba(190,140,230,.12);color:#d3b2ee;border:1px solid rgba(190,140,230,.4)}
+.chip-credential{background:rgba(143,169,196,.12);color:#b4c7da;border:1px solid rgba(143,169,196,.4)}
 
 .url-row{padding:10px 12px;background:var(--surface);border-radius:8px;border:1px solid var(--border);display:flex;align-items:flex-start;gap:10px}
 .url-status-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
@@ -287,15 +287,15 @@ input.text-input::placeholder{color:var(--muted2)}
 .url-flags{display:flex;flex-direction:column;gap:3px;align-items:flex-end;flex-shrink:0}
 .feed-status,.feed-note{font-size:11px;color:var(--muted);line-height:1.5;display:flex;align-items:center;gap:6px}
 .feed-note{margin-top:4px}
-.feed-dot{width:7px;height:7px;border-radius:50%;background:#b45309;flex-shrink:0}
-.feed-dot.ok{background:#15803d}.feed-dot.off{background:#9ca3af}
+.feed-dot{width:7px;height:7px;border-radius:50%;background:#ec8b3f;flex-shrink:0}
+.feed-dot.ok{background:#5cc795}.feed-dot.off{background:#8f8a80}
 .uflag{font-size:9px;font-family:'IBM Plex Mono',monospace;padding:2px 7px;border-radius:8px;background:var(--danger-light);color:var(--danger);border:1px solid var(--danger-border);white-space:nowrap}
 
 .alert{border-radius:var(--radius);padding:12px 16px;font-size:12.5px;line-height:1.6;display:flex;gap:10px;align-items:flex-start;margin-top:8px}
 .alert-icon{width:16px;height:16px;flex-shrink:0;margin-top:1px}
 .alert-icon svg{width:16px;height:16px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.alert-danger{background:var(--danger-light);border:1px solid var(--danger-border);color:#9f1239}
-.alert-danger .alert-icon svg{stroke:#be123c}
+.alert-danger{background:var(--danger-light);border:1px solid var(--danger-border);color:#f4a39d}
+.alert-danger .alert-icon svg{stroke:#e5534b}
 
 /* Report */
 .report-toolbar{background:var(--white);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;gap:10px;align-items:center;flex-shrink:0}
@@ -309,11 +309,11 @@ iframe.report-frame{width:100%;flex:1;border:none;background:#fff;min-height:0;d
 .mode-btn{
   flex:1;display:flex;align-items:center;justify-content:center;gap:7px;
   padding:8px 12px;border-radius:7px;font-size:12.5px;font-weight:600;
-  border:none;cursor:pointer;transition:all .2s;font-family:'Inter',sans-serif;
+  border:none;cursor:pointer;transition:all .2s;font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
   color:var(--muted);background:transparent;
 }
 .mode-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
-.mode-btn.active{background:var(--white);color:var(--primary);box-shadow:var(--shadow-md);border:1px solid var(--primary-border)}
+.mode-btn.active{background:var(--bg);color:var(--primary);box-shadow:var(--shadow-md);border:1px solid var(--primary-border)}
 .sms-analyzer{padding:0}
 .sms-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
 .sms-phone-wrap{display:flex;gap:24px;align-items:flex-start;margin-bottom:4px}
@@ -326,10 +326,10 @@ iframe.report-frame{width:100%;flex:1;border:none;background:#fff;min-height:0;d
 .sms-phone-top{display:flex;justify-content:center;margin-bottom:10px}
 .sms-phone-notch{width:50px;height:6px;background:#2d2d4e;border-radius:3px}
 .sms-phone-screen{background:#f0f0f0;border-radius:14px;padding:12px 10px;min-height:160px}
-.sms-from-label{font-size:10px;font-weight:600;color:var(--muted);text-align:center;margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+.sms-from-label{font-size:10px;font-weight:600;color:#555;text-align:center;margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
 .sms-bubble{
   background:#fff;border-radius:14px 14px 14px 2px;
-  padding:10px 12px;font-size:11px;line-height:1.6;color:var(--text);
+  padding:10px 12px;font-size:11px;line-height:1.6;color:#1a1a2e;
   box-shadow:0 1px 3px rgba(0,0,0,.1);word-break:break-word;
   max-height:120px;overflow-y:auto;
 }
@@ -337,7 +337,7 @@ iframe.report-frame{width:100%;flex:1;border:none;background:#fff;min-height:0;d
 
 /* SMS score hero */
 .sms-score-hero{
-  background:linear-gradient(135deg,#3b0764 0%,#4c1d95 40%,#312e81 100%);
+  background:linear-gradient(135deg,#1d2024 0%,#22201a 100%);border:1px solid rgba(214,168,78,.35);
   border-radius:var(--radius);padding:20px 24px;margin-bottom:16px;
   display:flex;align-items:center;gap:20px;flex-wrap:wrap;
   box-shadow:var(--shadow-lg);width:100%;
@@ -360,8 +360,8 @@ iframe.report-frame{width:100%;flex:1;border:none;background:#fff;min-height:0;d
 
 /* ── Mobile bottom nav ── */
 .mob-nav{display:none}
-.mob-overlay{display:none;position:fixed;inset:0;background:rgba(30,27,58,.45);z-index:300;backdrop-filter:blur(2px)}
-.mob-drawer{position:fixed;bottom:0;left:0;right:0;z-index:400;background:var(--white);border-top:1px solid var(--border);border-radius:18px 18px 0 0;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 -8px 32px rgba(109,40,217,.15);max-height:88vh;overflow-y:auto}
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:300;backdrop-filter:blur(2px)}
+.mob-drawer{position:fixed;bottom:0;left:0;right:0;z-index:400;background:var(--white);border-top:1px solid var(--border);border-radius:18px 18px 0 0;transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:0 -8px 32px rgba(0,0,0,.5);max-height:88vh;overflow-y:auto}
 .mob-drawer.open{transform:translateY(0)}
 .mob-drawer-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 6px}
 .mob-drawer-title{font-size:13px;font-weight:700;color:var(--text);padding:0 20px 12px;border-bottom:1px solid var(--border)}
@@ -402,32 +402,45 @@ iframe.report-frame{width:100%;flex:1;border:none;background:#fff;min-height:0;d
   .hkey{min-width:70px;font-size:9px}
   .hval{font-size:11px}
   .finding-text{font-size:12px}
-  .mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--white);border-top:1px solid var(--border);box-shadow:0 -2px 12px rgba(109,40,217,.1);height:60px;align-items:stretch}
-  .mob-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:9px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;padding:6px 4px;text-transform:uppercase;letter-spacing:.5px;transition:color .15s;font-family:'Inter',sans-serif}
+  .mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--white);border-top:1px solid var(--border);box-shadow:0 -2px 12px rgba(0,0,0,.4);height:60px;align-items:stretch}
+  .mob-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:9px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;padding:6px 4px;text-transform:uppercase;letter-spacing:.5px;transition:color .15s;font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif}
   .mob-nav-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .mob-nav-btn.active{color:var(--primary)}
-  .mob-nav-more{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:9px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;padding:6px 4px;text-transform:uppercase;letter-spacing:.5px;font-family:'Inter',sans-serif}
+  .mob-nav-more{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:9px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;padding:6px 4px;text-transform:uppercase;letter-spacing:.5px;font-family:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif}
   .mob-nav-more svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .fab{display:flex;position:fixed;bottom:70px;right:16px;z-index:250;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#6d28d9,#5b21b6);color:#fff;border:none;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(109,40,217,.45);transition:transform .15s,box-shadow .15s}
+  .fab{display:flex;position:fixed;bottom:70px;right:16px;z-index:250;width:52px;height:52px;border-radius:50%;background:var(--primary);color:#16130a;border:none;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(0,0,0,.5);transition:transform .15s,box-shadow .15s}
   .fab:active{transform:scale(.93)}
-  .fab svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .fab svg{width:22px;height:22px;fill:none;stroke:#16130a;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   #pane-report .report-toolbar{padding:12px 16px;flex-wrap:wrap;gap:8px}
   #pane-report .report-toolbar span{display:none}
 }
+/* ── Shield InfoSec theme additions ── */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.14;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:64px 64px;-webkit-mask-image:linear-gradient(#000,transparent 55%);mask-image:linear-gradient(#000,transparent 55%)}
+.topbar,.layout{position:relative;z-index:1}
+.brand-icon img{width:38px;height:38px;display:block}
+.brand-name{font-weight:600;letter-spacing:-.3px}
+.brand-by{margin-left:auto;font-size:12px;color:var(--muted2);text-decoration:none;white-space:nowrap;border:1px solid var(--border2);border-radius:8px;padding:6px 12px;transition:all .15s}
+.brand-by:hover{color:var(--text);border-color:var(--primary)}
+.brand-by + .badge-online{margin-left:0}
+.btn-primary svg{stroke:currentColor !important}
+::selection{background:rgba(214,168,78,.35);color:#fff}
+:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
+.report-toolbar .btn{white-space:nowrap}
+.report-toolbar .btn svg{width:14px;height:14px;stroke:currentColor;flex-shrink:0}
+@media(max-width:700px){.brand-by{display:none}}
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="brand">
-    <div class="brand-icon">
-      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-    </div>
+    <div class="brand-icon"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAbJklEQVR42u19aZBd13He133Ovfe9WTGDjQRBbARJgIsoQlwkMdZCUdRKSpYlRY4Sx0nKZUt2XJVK2fnp/HSVf6QSO6XETkpOKpKjxJIl0RKtaCEpihQF7sRCbCRALBxgMMCsb7n3ntNfftz7BgNupiVyRgDnVD3Mw8y7773bffrr7q/7nCN45SEAkvp5Uf9swI/c6D1vl4gdorwKIlsg6APA+pq30qjvmUUEjip4VET2xYD7YmH3AbNn6td5AAogALCXvol7hTf2tTADgAhgpfcDt2iafcKrfJSQG0VkM8A1ougHxC1Q2lttSKUDOECbMBmFyuXO8Qrv0hXRNwJifqaWo9Ty5ktn+sLnWj83bEWavDi8XQx3krgLineIaBOUBe9BLI+FY158JONhQL9nzv91TO1xTE5O1y+Q2hL4UgvQevYHAM51Bz8olH8HuH8sKlsFyACpLyTfwrP+1eCo94OAiIiOimC7GndIYGJ92X7kebuW8csgqPfLMIzhEWn03S2QLwrkA6IyAIgAjPUnWC14WVbAy5TQk48BIhDJILIO4BZnMpC4oaMxtifqya4AzC2AHmLjxkzyzscM+odQfTdEBIz5AiW5+qHLwn9Z0NKTY08+BrCEgCK6GoYbiVhaw+9BWc71Xu8AZAACNm7M0tMzHyDkd6HyLhAELALSE/yywP/BChHt4b2INAFcIVDH/sZTFRytb/S0FZOgV8P4b0Vxe+XVGaq/iV8W/i9kFaiVEEVlhQCX+IjnYhg9CrwYXfXH0SGf2K8L5Dch2g9YF5CkFv7y+MVDo8qHiqgAQ6T0NdJyb1nmxxUAfKO4kZBPQ2SodiTLs/6NzxcSkAZIKsQdReQtAJwCaCrkZiHeBoDgPO7rstzeUDjS+QhJdRCCHUkyfIPzzaEbReSjEL0ZnE8Q3LLM3pRhgChEAEgbYNN74kNRZItAgCrNXYaeN284gAJCSNtMYeIjcCuIS+pcYlkBixIZESpYTWDYQ7AVlJULeJ1l7H9zFdB7mgkk8wLZCEFSK2B59i8yf+QBaV7Yt3BBTxt6XKjFFAFEqq9NXpC0uKDmKi444ZOEQKCueogIeIGWJnSJQGPh//n6hF491CnSzAMw5O0cZbeECpCmCtVaEXxd34Mv+fzX/V3eyLEUXM8/GLlFANVqrtCIMgaEIppF0mIUIyRJVEQFzgtAwIwXBLQutgLkJbNMXk1HpJwTviicFxCCvN1FKHOuGBku1l8+Ws7MlXLqxGQj73R81syQpB5m1XuYnavdiZzn7eS1Q8RFFEjaXLG06FkLpfJIUj1EIHXGHmNEKCJCWYAWDEB5+frh+Nlfuxbvf99mnZzs8m+/s59/9/0jMj3T8YB4dSpJ5uCcg2qVX0ZWOMbKOs777LeSBbwMWnoPsoIXGmsLIEAgxsgYIr1zHF41HK6/dm349CevjB+5c0O6ZeNgajHa9i2NYsvGwfCd/3eMR16Y4lw7aN4x9R6iCul9yLwR1BFUzzqWMopaCgtg/a9UEUw1M82IGAkLEWa9FhpGiA8jI0Nhx44N8cN3XqkfumNDev3VA3r8xem4e++ZMDjg5JqtzSRLo+zceTre+6Ox4r6HTmLvvinXmis8YBWzKwKVKmpyCeCcghSYcaECFj2zWHQFkKAo4JwII5F3DTQzQEIlAEH/gOea1U1evn4E27Zdgptu3oBbbt6Aq7eOwmkpe/e8yK9+7Rne/+MjHBzM5O47N8gnPrwG61apTE7Ocve+s3j0qUk8uWtODh3ucGy8i8mZKJ2uCWgAggL0zieSNiriN0aSrH3FxawA0doTG1GUpBe11aM+rl7djCOj/bbmkpVcv2ENrr5yNbdvG5Yrtqz0a9euUNLkuUPjdt+PDpTfvGcfH/7p0WR2diYBHC+9ZEV+xz9aHT/83hX+pusbySWrHayMdnyssP3Pde3g0Y4dPtbByTOlTLdFpqYhL57q+ImJlhelVmFtD/0oFy0EGYE0FTACnVaJRjPN33njUP6J9/T7G9825Fddvk5WrtvK4bWbmPWnkrdneerktO0/OB0ffeyY/eQnh93ePceTiYkZ382h4hxgBM042Odt7epm2HbVQPnOGwbs7dsauvmy1K0YUlWKtFs5WgURtV86bpX99MlO+Iu/3MVn951sJN77pJEAAitLk9pdXEQKYD3zVRALQ1mYZZnPP377SPzndw27qzcnmjQaFtJRi36tzMQVeHG8lIMHX+Sze8dk375xeXbfmExNzihgWtWLGhGSWIXapQdiXXFytnplxis3NHjV1j5evaXJDWszrBwmBvoUo6uGufnaza6MXr/1rf3hT//bAe58ajoRQZI1nUCENMpiZRGLZgFSh5rddrTB/qS8870j+e9+bjS5ar1LH3mmHXbu6Rbjk8LJFnV8Ejg21sXE6SlX5m0XY3SA6orhJgcH+8PwcBYH+yVmXiwapZObzsyUbma61JlW6dudKADMORebfUlYuTKLl6xUGelXrFnVjLfceqn/yB1r041rFN/63qnij7/0Ap965nQWjL7R8GJk5SouFgU4JwjBEEpiaCDt3PX+0fK3Pj3U2Loh1fsfLYo/+8op7j4w6yxGHwIlGBFjFCAIINboaxTXbl8bb7tlDa67uk83Xipu5SCYqaHsFjI5k+PFkx0eeqEbdx/s2pP7czk6ViShCGlFuKh5VQgM3sGGh7Py7g+vtz/4nc3J5k19eu8PToc/+dKh+PBjEykFqXeAqJ7LFy7UPEAWzCCLJCPspusH8LmPjrjL1ji598et+KWvneXje2Y9rEwgqiIVlaDOY2S4P16zfVX4wO2b7L3vXu+2bR2UvmbJsj1tZadFlMFC7nR0hcqmdQ43XduU8YncP/t8Fw8+mceHn+x0j5zoJrToIwBVQbeMrjM+K1/9+pGy1WH4gy9sSN73riE/dmpdPHW6a/ufm6KKkzQRWOSbbgWLlIhVtIA6sWs2J37bRsd9h8vyy988a4/vmkqdR9ocSKDOQUTQaRdQ0bDt6jWd3/vtt+GTn9iUODh/4kSLu/ZOx2efPcnjx6c5O5NHmsX+PvOXjorbtNbr+tX073l7yuu2pOVVG9LwzQeSuOdgOwsh+r5+J6qeofS+1crd1/7mSPuy1Vr+4Rc2+B3XD/krLu+X/YcmK/RfJDe8iJkwAVb31WqTJ04W5cTZPBHExHsPgSAEVnBVBjTSBJdd2s8rr1gh3VbEt+890v3GPc/b/oNn/JnxWT8zVyTdbvSkWJKI9jedrF6Z2PVXNjt33NqQm7anyWc+2PSbLkvKL39bOg8/MZe1WyHLmg5pw8MXEWWR+2Nj7TAxHUO3CI4SF70cu3gKEICkFCXZzQ0hEqmHAE56tEAIVmWmUASj7jt0NvvSf99Fmsnf/fCIP35sSqqGYpEVK/psxzUDaKTQibOlPX882MHDBQ8ezuWZfYl+4J2D8VMfHNB3X59674ZAMjz42Jx02pYkiUC1Yp+8F4RI63Sji8FkscmhReeCRADvgSwTURUQZDSIr4kaMyJJExDUXXsn0t17TppFxjQTXTmS+HYbUkSN77ttbfF7n78sXrKiTI6fmOXju1v2s11dfWrfnD90NJdjpywcH4/lb31yIHnXdUmWF0P55BzyZ/bOaqcVfcU+iLlEkHlIovP1ALlIFSAQCAhDZEQ0whYknQvvvsqvBDATM8qGywbiZ+66LHS61G/cO5acGu+oitiKwSSsGaUfbqR+wxpLbrte5ckDPv+bH3XsoSfbje89OGMCC//6swNy67V9/rMfIE+e7JbjE4X4hA4QIUjGCAsLuOtXrB1dLGxor7RlIlUbEqgKSX0FQzFWeoilkSa29YqR8vf/5Ub+5q+t8Q8/1go/eWyqe2p8rn/n4+ONP/oPpa5cARkdJK/emNi1mxTve0fqVg3R9Tct/OCnHf3eQ3N+eNCXv/+5RnLnrWnj0NHh7rfvnw1T0y0HiDippz6t6si/aH3AgsKf1M5YhD0iDJ1uRIhVyTEGQyiMq1c38t/41UvsN+4eSZ0Gd+jIHGdnSyPB42Mtf3wsB6ABIuHStU37lben+NCt2ti2EfKv7urPYdDvP9LV7z7Yspu3N+yTdwzKHbeNxF2HSn1ichYQhToR6X2Ri64ewFeuhVVpPtmrTsUAhEADgawJLfKIvmYSPvXBNfFzHxnJrAz+L74x3f6z/3FMjxydaYys7Cuv2tzMV/SrTM9GHj7R4djJtv/69zvu+eNZ+c8+3sd3bbfGp96fxeOnYr7rUDe5/4kur7l6pNUuoznPbD4wY1UP4JJUhJcEglAvNwNirFSwbk1SXLttMO92qbv2zTbzNrl1S1/41TsG/NpR5T0/miz/6/86poeen3Xbtgzytz+/Du/eMSCOhZs805L9z2V232MtPPBoYY/tLsQ7wVCjWaSZK1eNOFFF8tCTLWuVp0K3oD85UXjnHUIAYoggAyru4SJXAAEYq+zSOSAEQgR2y3XN8gu/vqY8fCK6f/98K4g4u/WGfrtqgzb2HJwr/uc9E+HQ4dkBdWLXbxvqfuw9w7phnfMHn891sAn8yg0e2zcNxvVriviV784lT+zJ5a/6XHdwUO34mdBIM6enz+Tu+z/uakW/OBVxACItBFqZI1qoDeAiDEMX3hId6JxShFpEiVkquO6KRLZv9o3TZ4MUpdnKEW83bUsVZvbAozN8+MkZVwaFT0UPHG3rV++ZiAD59P6OWIjx1u3q3nkd/YffBR2f9Pb1H5o88Fin6VNqoAgEkjQFDOLMrKIYatBhpLCItBgXhftZagiiEIQARkoZycSrrR110u2UevBYF7NzFm+4usEt67yeOl3YE7vaOjddatZwSDPoc0db6Z//727MA3FmKgKE7tqfxulWFj9yi6bvvs6XTx2w+OxzRZqXppo6eA84FWgmKINEEgzRqjCAlBhJ2sUeBS1kJIygBZgRzomkCTDVjuGFsYJFSb10lZfRQc9j4zlPnSkdAB+CCURQ5ObnZkoPSLXGE8Tzx5F/7xEtr9vobe2I4MrLPY+OBevk0IE+QQxEu0P0NSVec0Vfvno05cEXOv6Fo22URQCWLghanM64BSVvISCgQaAEBSIQ5yoW1EwNEKSpaJIQ7a5ZNw8AqDECeQmjgGnmkDUdkvonAH96OrhTUwyJd3HVEMQpKgJQUPUURbOBPi3/6cdHyz/64uV29+2rTVWs0wkU0Yq4veijIOmFfOfHfKJA4oTOVdkBhCIKqJLdnHQqccc1fcXKlUl8/njhx8aLrCipSaqYX5xO09KkJACvcFLHu93CalqczBLhpsucXH9VqjufScWpWCiFIGU+FF1kJ6xLgEDnZfyygPs9rz9HKIBJu2vWyFz5yduHii9+ZqS45ZpGYKDl3QgaEauIlgqYdwpxClbiFwAIkRaK3sdSpmdKN3G261t5cIQCIqAZzF5KRVxECnitPkBK1QmHuhBzjrEwxEApSjBJxNauZLJhraWrR6DOC+tL54s+AoH3giRRqHOIEeKchHVrsmL1yrQElDEKSGUgGKxajygWq4TEbN4GFtMKFp8NrbWueu42q1aVBQ1SBCwQZej1iBJFHrXVLqQsQ11eVngnCPU1vdVtqRexaJKXFq9Y78t/8vHh2C4T/ctvnnGddkGLhHdCsvK8JBHKgBCs7kvBxQpB0svEIEKIVmKsvTLO0THn+jdpVdJmRul0jXMts24uNFbrPENkHdPX11VIIzGYlMHilkud3X1bE3e9fxgb12Us8miMAQpWPTKQag8BM9DIJSBD31wLWEiuyzz+VzNdyKo/E5wPTVFDN0kwWk0PsG7eJaRaXVgry9AtOL9Kpud0WV1DQBgZkBe5Fkg9SIGIUZRmAdbLfElEi6Cetw/SxQZBMi/IniFgQfcT51nqio8JkWh1DXlhL2uclV7LCDRmiTMzSgmjAWJ2rvNZBCgDMZcTbYsSagVznoFbwI6bVe1GS7BKVxcV/uu717oN/bxFm72tjgAkTtCXCVIPqLCulFWyKUtKXhhXjSblHbcMdG++tlmkqVpeVA2+rmdVIFQViRN4r5x38WayYC7AyIqfWqJFom+6BZwX2IBmRhOYOQq1QpUKj6UXjZKNTDk8pOxvKlSVpIkAdBAtoyEvLbznyiz8zqeH+cKLuR17scTE2ZxmhLoKuYhzsMUFPoi1Mo1SG4IJjQzRSPYwb/E0sThknFQZqRHIC2FRKqFWLRGsRCQEqZVH1rHTxqcPMOw7RplpwzkVFbEI9CIV2tAgsH4NNC+da2ZAtHmidb4LjwYEVrlCD5qiEdEMsVpGAy+VQmY7Jt2SUuGQoDa8N10TfrFcQAX55iZnzc7Mgs4rslTmezCjAU6I1EP3PN/ll++Z1omzpZuaplszKgYhihjZE1CnEzFxtiuTU6ZlSfYaul62CpAQsVj5e1R4bzTQIkgiccpQCo+OFTIxFRQLVjNdHBC0EF0Ad+JUiAeOBlu/tmEDTZeMGSEQ0oyiQJaKTpwt3AOPhCQaxCJimnkTFZYlpKqb1ZGScUEhhUIuyKVQtZ4kAvES1Umv+9zAEMFIUKDOaZiZY3zmQJGOTZTa217JyPM6+y5oJ2xGsHK8cvRkSB58oqtjZ5CbusJ5SBVeCp1TqECiGVq5oVtWcb0uCJcW1q1USNXzqUyiQpFqsYVjmvrSey0swkAKjQihgvosE0znrth7lOXeQ7nLO+Z8qqiIwYvEAkQq3IUALlFMt6Lu3NNKDa4zdqZEo6kiWhWIhUBR0lauSOOO6waKianCP/1srkVOMFY0D2uEf6XewZrio6jAO9GTk6YP7SrjbMc4PhngExGS6HSNIkSWCZ9/Mcp9j+c6djp6CKTKkiHkRaKAczBUrQ8AiNNn8uT+n50dnJ6J2LrR0ylgkVpEs27B+L5bh+zffH7Untg7XR49UbhOh0KKpF7Rm/BWh5CxV0ihCANRRsJ7sNHQ5MALwf3Hv5pmNOip8cDVK5NABfIiwonAibpjJ7r9M7O5dEtTnyptkUvDi14Rc05AUmfnyiaNIU2zMDqcoK8BDRX3w7WjXrdv8e7spLIvA6eKWol6flLRI+3O+63VzV0CmSsox04Gq2JOQBUiQm2kxEDTmRq9xTJpdZ2oilWNeoubDCw+Hc1qvUCjqQBEWx3q6RlahAv9zcQggnY36ORc6Vq5qUVWglfwVWltzvPaUAFipBQlbMWQlnfe2shve0dfkaYulqVZomLdQuPY2cCy6gWVNJFF5X+W0gJkng6qm+ImzhTuW/e3QpS0bDY8nZckVMnqueyV9d6PC5Jn1rSDxR4JJ1SATkzLQMlLizdcpeW/+Fgap7sNjJ8xGZ/oWrfrOzt3B/f9R+ayVmHqEkWouvGWZKOqJVmo3at9+FTQKeh++LO55OwsQ9GVaAT6m9BY0kJYsLB6fobK/GSNr0Kf1XScNRPj6hHqYFRdu8rJ4WMi332k0FY3JAdeKLwIJEkWL+L5ZVGAzENRoogRmJwqkwcfnxYGCTCR4SFnWSpMPMRViTJevlc4wUhE47yT78GSCFmTcdJum5RKaaYqIdA/+OTsgHNwINV77a3SX7INC5ZiuxoulKEKmGQCgD6GmIGmZanR4GMjU6QJ1IxS7R9BgUSZh6BoiDHWVlBz/HaunpClIs2mM2MS8lwIxMSipSLwaSp1rQFLOpZ0r4jezHVO4LRqRy9LuEf3tO0bP/BlX6YFfJKoK30EJUY519JOQ4hWczyVUymDoVMaAIjzwlbhi2cOIT59pJUdPJ6r8yI+EXgFAoQv6UaUt5wCeix0jAApVO+gNH16fzuZmArxqvXNONMSNpuKgT6hT0RU690l6sLOfIeFEKKU1IHNTNjIVI+MifzfH+Wy50iRzc5GnzUcBEAZXtF1LMkOdEu1X5C9FNTNqp71xFecz7GTeXPiTJl1OhY3bUhCf8PFzNOlruawpaorqwA0gQqlkSrTTJmoi14lPTURBqbaEWVpzvke/fyq+xW9NKi96C1AXnbD9fpEn4BmkE4RHUk3M0f85JkyFCEpxSdRXOGDUYsAhkBAoaIaO6Xv7jlM99ShMstLOgJaBkOSVFyd8TVP/XhLQZDgVVKfHjYkXpimim7XZHo2JN/+cduOjTfydluMImg2Bc1UmSaKvgbk5FnRnc9GtHOTx/aVaYjQrAmqq7Jj+yXd1G/RqYjXmHULMVjMQDEi8YIYKWOny2x6LnpGGI02PJiEvkytmfjQnwbNuzF54PHuoCk0L+kSLyYCsQh5CazwdXz+W8YJv1aEJD3+R1VApbQ70TMCUInHTyHe96TZybPE2TmSNNfqwEsCJAmgUhXplxJeXhcULNmOWS8XymvOQKegClBGSFmCKwZdGBlyRbeIOjUbk25BnyYCVbCKql5V6H+fBSyqwpZaAXy9gui1IfZoDDMwxqrfutobruoQqjodXpVak58DGi9OKuLnSdp6DloFoFC0rsvIPMv3CxGab81E7DVyhdc0IecEiT/XVPcqkCO/zMLvKeCXcQ9yeT0WYT10euWZf0HsiX1Bn5bEC/ssUaJa1/DK59wuj8WxdDXjGMnZ5cMzlgRmRQkcoej0ArNYtobFAaAIolQneFrI8QV02LICFoGKITFthqPOaTOl4nKBXLugSXz5ILc3Z/TOGYYAB4T4mRZJ+YhYPFCzL/PeeVlWb8qI6NVCBAcB+bqi1Tpl5FMGOwZAIXD1C5eV8IbPfhCgghZA7CoKeVABIBbucaHcA6JV1Zm4rIA3HvsjBB4iBspuWHwMODujABJg+pgS3yDxLIjq+AqgrHOE5fGLCz9Uk1odgRmAX8mywZ2odu1BCqCIse+sKjMIrxDRVfW1cUFH5nKi8HNkujWcA9CEZEHwO5rhP7VnJsYApK5+kQLdrjWTAy5qH4AbRaVZLaNlrBeNLJ8x+fPNfAM0qSayfRfCPy7nZvb1JnVPAQ6AoChaiR86SosFhFtE3Uh9uLMtoCyWT1z9+7C+N+tFHEQSAl0Qf6vkn5bdmYdq+TkA0S24UAD4GNsT1vS7q9MReKkQw5WfEFlw8t6yAl6bYlAADiIgeZrAvRD7k7I783D9t/ltXtwrvkFZtqxMn/HeH6TZIIlLAGlKtRJuWfivJXypdx8RBDPZBeF/Dsb/Yt2Zfefg/hzjIK+gvR7kROAdifcHbxCRHUiwA9RrYLZRBGsg0sDFcJ7pG0YtMIKYEtHjEB402m5H7MxzeQSYnloAO7aQ7nGvkjDUihiLZvkJs/ypRtI4YcYGwBGIjIrMH4PLZUiCAMgNOKnETtD9dZnz/8Q4sxvIuxWEQ14pwf3/Iu24feyAq+kAAAAASUVORK5CYII=" alt="Shield InfoSec logo" width="38" height="38"></div>
     <div>
       <div class="brand-name">Phish<span>Guard</span></div>
       <div class="brand-tagline">Email &amp; SMS Threat Analyzer</div>
     </div>
   </div>
+  <a class="brand-by" href="https://www.shieldsecurity.co.in/" target="_top" rel="noopener">by Shield InfoSec</a>
   <div class="badge-online"><div class="badge-dot"></div><span>System Online</span></div>
 </div>
 
@@ -476,7 +489,7 @@ Email body goes here..."></textarea>
       </div>
       <div class="sidebar-section" style="display:flex;flex-direction:column;gap:8px">
         <button class="btn btn-primary" id="analyzeBtn" onclick="runAnalysis()">
-          <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           Analyze Email
         </button>
         <div style="display:flex;gap:8px">
@@ -502,7 +515,7 @@ URGENT: Your bank account has been suspended. Verify now: http://bit.ly/secure-b
       </div>
       <div class="sidebar-section" style="display:flex;flex-direction:column;gap:8px">
         <button class="btn btn-primary" onclick="runSmsFromSidebar()">
-          <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           Analyze SMS
         </button>
         <div style="display:flex;gap:8px">
@@ -524,7 +537,7 @@ URGENT: Your bank account has been suspended. Verify now: http://bit.ly/secure-b
       </div>
       <div class="sidebar-section" style="display:flex;flex-direction:column;gap:8px">
         <button class="btn btn-primary" id="dmarcCheckBtn" onclick="runDmarcCheck()">
-          <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           Check DMARC
         </button>
         <div style="display:flex;gap:8px">
@@ -584,7 +597,7 @@ URGENT: Your bank account has been suspended. Verify now: http://bit.ly/secure-b
         <div class="sms-analyzer">
           <div class="sms-input-area">
             <div class="sms-header">
-              <div class="card-header-icon icon-purple" style="width:34px;height:34px;border-radius:9px"><svg viewBox="0 0 24 24" fill="none" stroke="#6d28d9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+              <div class="card-header-icon icon-purple" style="width:34px;height:34px;border-radius:9px"><svg viewBox="0 0 24 24" fill="none" stroke="#d6a84e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:17px;height:17px"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
               <div>
                 <h2 style="font-size:15px;font-weight:700;color:var(--text)">SMS Smishing Analyzer</h2>
                 <p style="font-size:12px;color:var(--muted);margin-top:2px">Paste a suspicious text message to detect smishing attempts</p>
@@ -606,7 +619,7 @@ ALERT: Your bank account has been suspended. Click here to verify: http://bit.ly
 Or: You've won a $1000 gift card! Claim now: http://prize-claim.xyz/win?id=9482"></textarea>
                 <div style="display:flex;gap:8px;margin-top:10px">
                   <button class="btn btn-primary" style="flex:2" onclick="runSmsAnalysis()">
-                    <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     Analyze SMS
                   </button>
                   <button class="btn btn-sample" style="flex:1" onclick="loadSmsDemo()">Load Sample</button>
@@ -693,7 +706,7 @@ Or: You've won a $1000 gift card! Claim now: http://prize-claim.xyz/win?id=9482"
       <textarea class="eml-input" id="emlTextMob" placeholder="Paste email source here..." rows="5"></textarea>
     </div>
     <button class="btn btn-primary" onclick="runMobAnalysis()">
-      <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       Analyze Email
     </button>
     <div style="display:flex;gap:8px">
@@ -713,7 +726,7 @@ Example:
 URGENT: Your bank account is suspended. Verify: http://bit.ly/secure-bank"></textarea>
     </div>
     <button class="btn btn-primary" onclick="runMobSmsAnalysis()">
-      <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       Analyze SMS
     </button>
     <div style="display:flex;gap:8px">
@@ -730,7 +743,7 @@ URGENT: Your bank account is suspended. Verify: http://bit.ly/secure-bank"></tex
       <input type="text" class="text-input" id="dmarcDomainInputMob" placeholder="e.g. paypal.com">
     </div>
     <button class="btn btn-primary" onclick="runMobDmarcCheck()">
-      <svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       Check DMARC
     </button>
     <div style="display:flex;gap:8px">
@@ -1289,7 +1302,7 @@ function calcScore(hf, ips, kw, urls, lookalikes) {
   return { score: Math.min(s, 100), level: s>=60?'HIGH':s>=30?'MEDIUM':'LOW' };
 }
 
-function riskColor(level) { return level==='HIGH'?'#be123c':level==='MEDIUM'?'#b45309':'#15803d'; }
+function riskColor(level) { return level==='HIGH'?'#e5534b':level==='MEDIUM'?'#ec8b3f':'#5cc795'; }
 
 // ── SVG icons ──────────────────────────────────────
 const ICONS = {
@@ -1324,7 +1337,7 @@ function renderOverview(r) {
     ...r.urls.filter(u=>u.flags.some(f=>f!==u.lkFlag)).map(u=>({text:`Suspicious URL — ${u.domain}: ${u.flags.find(f=>f!==u.lkFlag)}`,severity:'high'})),
     ...(r.lookalikes||[]).map(l=>({text:`Look-alike domain — ${l.host} may impersonate ${l.brand} (${l.legit_domain}): ${l.detail}`,severity:l.strength==='strong'?'high':'medium'})),
   ];
-  const dotCol = sev => sev==='high'?'#be123c':sev==='medium'?'#b45309':'#15803d';
+  const dotCol = sev => sev==='high'?'#e5534b':sev==='medium'?'#ec8b3f':'#5cc795';
   const findings = allFindings.length
     ? allFindings.map(f=>`<div class="finding-row"><div class="finding-dot" style="background:${dotCol(f.severity)}"></div><div class="finding-text">${f.text}</div><div class="sev-badge sev-${f.severity||'low'}">${f.severity}</div></div>`).join('')
     : '<p class="no-findings">No significant phishing indicators detected.</p>';
@@ -1392,9 +1405,9 @@ function renderURLs(urls) {
 
 function renderReport(result) {
   const {score,level} = result.risk;
-  const color = riskColor(level);
+  const color = level==='HIGH'?'#be123c':level==='MEDIUM'?'#b45309':'#15803d';
   const now = new Date().toLocaleString();
-  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Inter,Arial,sans-serif;max-width:820px;margin:0 auto;padding:28px;color:#1e1b3a;font-size:13px}h1{font-size:20px;font-weight:700;color:#3b0764;border-bottom:3px solid #6d28d9;padding-bottom:10px;margin-bottom:6px}.meta{font-size:11px;color:#6e6a8f;margin-bottom:22px}.score-block{background:'+(level==='HIGH'?'#fff1f2':level==='MEDIUM'?'#fffbeb':'#f0fdf4')+';border:2px solid '+color+';border-radius:10px;padding:20px 24px;display:flex;align-items:center;gap:24px;margin-bottom:22px}.score-big{font-size:52px;font-weight:700;color:'+color+';font-family:monospace;line-height:1}.badge{background:'+color+';color:#fff;padding:5px 16px;border-radius:20px;font-weight:700;font-size:12px}h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#6d28d9;border-bottom:1px solid #e4e0f5;padding-bottom:6px;margin:20px 0 10px}table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px}td,th{padding:8px 10px;border:1px solid #e4e0f5;text-align:left;vertical-align:top}th{background:#f5f3ff;font-weight:600;color:#4c1d95}.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;margin:2px;font-family:monospace}.t-urgency{background:#fef2f2;color:#9f1239}.t-financial{background:#fffbeb;color:#92400e}.t-threat{background:#fdf4ff;color:#7e22ce}.t-credential{background:#eef2ff;color:#3730a3}.url-susp{color:#b45309;font-size:11px;font-family:monospace;word-break:break-all}li{margin-bottom:5px;font-size:12px}footer{margin-top:32px;font-size:11px;color:#a09cc4;text-align:center;border-top:1px solid #e4e0f5;padding-top:14px}</style></head><body>'
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;max-width:820px;margin:0 auto;padding:28px;color:#1c1a14;font-size:13px}h1{font-size:20px;font-weight:700;color:#1c1a14;border-bottom:3px solid #8a6a1c;padding-bottom:10px;margin-bottom:6px}.meta{font-size:11px;color:#6f6a5a;margin-bottom:22px}.score-block{background:'+(level==='HIGH'?'#fff1f2':level==='MEDIUM'?'#fffbeb':'#f0fdf4')+';border:2px solid '+color+';border-radius:10px;padding:20px 24px;display:flex;align-items:center;gap:24px;margin-bottom:22px}.score-big{font-size:52px;font-weight:700;color:'+color+';font-family:monospace;line-height:1}.badge{background:'+color+';color:#fff;padding:5px 16px;border-radius:20px;font-weight:700;font-size:12px}h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#8a6a1c;border-bottom:1px solid #e7dfc4;padding-bottom:6px;margin:20px 0 10px}table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:12px}td,th{padding:8px 10px;border:1px solid #e7dfc4;text-align:left;vertical-align:top}th{background:#faf6e8;font-weight:600;color:#6b520f}.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;margin:2px;font-family:monospace}.t-urgency{background:#fef2f2;color:#9f1239}.t-financial{background:#fffbeb;color:#92400e}.t-threat{background:#fdf4ff;color:#7e22ce}.t-credential{background:#eef2ff;color:#3730a3}.url-susp{color:#b45309;font-size:11px;font-family:monospace;word-break:break-all}li{margin-bottom:5px;font-size:12px}footer{margin-top:32px;font-size:11px;color:#9a927a;text-align:center;border-top:1px solid #e7dfc4;padding-top:14px}</style></head><body>'
     + '<h1>PhishGuard — Email Threat Analysis Report</h1>'
     + '<div class="meta">Generated: '+now+' · PhishGuard Email Threat Analyzer</div>'
     + '<div class="score-block"><div class="score-big">'+score+'</div><div><div style="font-size:16px;font-weight:700;margin-bottom:10px">Risk Score: '+score+'/100</div><span class="badge">'+level+' RISK</span></div></div>'
@@ -1417,7 +1430,7 @@ function runAnalysis() {
   const btn = document.getElementById('analyzeBtn');
   const scanBar = document.getElementById('scanBar');
   btn.disabled = true;
-  btn.innerHTML = '<svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:spin 1s linear infinite;flex-shrink:0" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Analyzing...';
+  btn.innerHTML = '<svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:spin 1s linear infinite;flex-shrink:0" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Analyzing...';
   if (!document.getElementById('spinStyle')) { const s = document.createElement('style'); s.id='spinStyle'; s.textContent='@keyframes spin{to{transform:rotate(360deg)}}'; document.head.appendChild(s); }
   scanBar.classList.add('active');
 
@@ -1457,7 +1470,7 @@ function runAnalysis() {
       + '</div><iframe class="report-frame" id="reportFrame" srcdoc="'+reportHTML.replace(/"/g,'&quot;')+'"></iframe>';
 
     btn.disabled = false;
-    btn.innerHTML = '<svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Analyze Email';
+    btn.innerHTML = '<svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Analyze Email';
     scanBar.classList.remove('active');
     switchTab('overview');
   }, 500);
@@ -1700,7 +1713,7 @@ function renderDmarcResult(domain, result) {
   const color = riskColor(level);
   const circ = 2*Math.PI*36, dash = (score/100)*circ;
   const findings = dmarcFindings(domain, result);
-  const dotCol = sev => sev==='high'?'#be123c':sev==='medium'?'#b45309':'#15803d';
+  const dotCol = sev => sev==='high'?'#e5534b':sev==='medium'?'#ec8b3f':'#5cc795';
   const findingsHTML = findings.map(f=>`<div class="finding-row"><div class="finding-dot" style="background:${dotCol(f.severity)}"></div><div class="finding-text">${f.text}</div><div class="sev-badge sev-${f.severity}">${f.severity}</div></div>`).join('');
 
   const policy = result.found ? (result.tags.p || 'none') : '—';
@@ -1776,7 +1789,7 @@ function normalizeDomainInput(raw) {
 async function runDmarcCheckFor(domain, btn, pane) {
   const originalHTML = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = '<svg style="width:14px;height:14px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:spin 1s linear infinite;flex-shrink:0" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Checking...';
+  btn.innerHTML = '<svg style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;animation:spin 1s linear infinite;flex-shrink:0" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Checking...';
   if (!document.getElementById('spinStyle')) { const s = document.createElement('style'); s.id='spinStyle'; s.textContent='@keyframes spin{to{transform:rotate(360deg)}}'; document.head.appendChild(s); }
 
   pane.innerHTML = `<div class="empty-state"><div class="empty-icon">${icon('globe')}</div><h3>Looking up ${domain}…</h3><p>Querying DNS for a DMARC record.</p></div>`;
@@ -1931,7 +1944,7 @@ function calcSmsScore(keywords, urls, text) {
 
 function renderSmsResults(text, keywords, urls, risk) {
   const { score, level } = risk;
-  const color = level==='HIGH'?'#be123c':level==='MEDIUM'?'#b45309':'#15803d';
+  const color = level==='HIGH'?'#e5534b':level==='MEDIUM'?'#ec8b3f':'#5cc795';
   const circ = 2*Math.PI*36, dash = (score/100)*circ;
 
   const typeLabel = level==='HIGH'?'Smishing Detected':level==='MEDIUM'?'Suspicious Message':'Appears Clean';
@@ -1943,7 +1956,7 @@ function renderSmsResults(text, keywords, urls, risk) {
     ...(text.trim().split(/\s+/).length < 30 && urls.length > 0 ? [{text:'Very short message with a link — classic smishing pattern',severity:'high'}] : []),
   ];
 
-  const dotCol = sev => sev==='high'?'#be123c':'#b45309';
+  const dotCol = sev => sev==='high'?'#e5534b':'#ec8b3f';
   const findings = allFindings.length
     ? allFindings.map(f=>`<div class="finding-row"><div class="finding-dot" style="background:${dotCol(f.severity)}"></div><div class="finding-text">${f.text}</div><div class="sev-badge sev-${f.severity}">${f.severity}</div></div>`).join('')
     : '<p class="no-findings">No smishing indicators detected — message appears legitimate.</p>';
@@ -2006,7 +2019,7 @@ function renderSmsResults(text, keywords, urls, risk) {
             5. Block the sender number
           </div>` :
         level==='MEDIUM'?`
-          <div class="alert alert-danger" style="background:var(--warn-light);border-color:var(--warn-border);color:#92400e"><div class="alert-icon" style="stroke:#b45309">${icon('warning')}</div><span>This message shows some suspicious signs. Verify by contacting the company directly through their official website — do not use links in the message.</span></div>` :
+          <div class="alert alert-danger" style="background:var(--warn-light);border-color:var(--warn-border);color:#f5c08f"><div class="alert-icon" style="stroke:#ec8b3f">${icon('warning')}</div><span>This message shows some suspicious signs. Verify by contacting the company directly through their official website — do not use links in the message.</span></div>` :
         `<p style="font-size:12.5px;color:var(--text);line-height:1.7">No major smishing indicators detected. Always remain cautious with unexpected messages, especially those asking for personal information or containing links.</p>`}
       </div>
     </div>`;
