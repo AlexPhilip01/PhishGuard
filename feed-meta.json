@@ -1,0 +1,83 @@
+{
+ "version": 1,
+ "generated_at": "2026-10-11T05:46:07Z",
+ "hash_bytes": 5,
+ "entries": 392027,
+ "sources": {
+  "phishing-database": {
+   "label": "Phishing.Database (active domains)",
+   "status": "fresh",
+   "count": 392027,
+   "dropped": 41
+  }
+ },
+ "rules": {
+  "platform_suffixes": [
+   "sites.google.com",
+   "storage.googleapis.com",
+   "docs.google.com",
+   "drive.google.com",
+   "forms.gle",
+   "github.io",
+   "githubusercontent.com",
+   "gitlab.io",
+   "pages.dev",
+   "workers.dev",
+   "r2.dev",
+   "netlify.app",
+   "vercel.app",
+   "web.app",
+   "firebaseapp.com",
+   "herokuapp.com",
+   "onrender.com",
+   "glitch.me",
+   "repl.co",
+   "replit.app",
+   "000webhostapp.com",
+   "weebly.com",
+   "wixsite.com",
+   "blogspot.com",
+   "wordpress.com",
+   "typedream.app",
+   "carrd.co",
+   "webflow.io",
+   "dweb.link",
+   "ipfs.io",
+   "cf-ipfs.com",
+   "cloudflare-ipfs.com",
+   "nftstorage.link",
+   "w3s.link",
+   "infura-ipfs.io",
+   "filesusr.com",
+   "plesk.page",
+   "edgeone.app",
+   "amazonaws.com",
+   "digitaloceanspaces.com",
+   "appdomain.cloud",
+   "azurewebsites.net",
+   "windows.net",
+   "cloudfront.net",
+   "bit.ly",
+   "t.co",
+   "tinyurl.com"
+  ],
+  "platform_endpoint_patterns": [
+   "^s3[.-][a-z0-9-]+\\.amazonaws\\.com$",
+   "^s3\\.amazonaws\\.com$",
+   "^[a-z0-9-]+\\.digitaloceanspaces\\.com$",
+   "^s3\\.[a-z0-9-]+\\.cloud-object-storage\\.appdomain\\.cloud$"
+  ],
+  "second_level_labels": [
+   "ac",
+   "co",
+   "com",
+   "edu",
+   "go",
+   "gov",
+   "ne",
+   "net",
+   "or",
+   "org"
+  ]
+ }
+}
